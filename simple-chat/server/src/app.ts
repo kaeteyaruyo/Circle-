@@ -3,7 +3,6 @@ import * as socketIo from 'socket.io';
 import { createServer, Server } from 'http';
 import * as path from 'path';
 
-var x = path.join('Users', 'Refsnes', 'demo_path.js');
 const app = express();
 const http = createServer(app);
 const io = socketIo(http);
