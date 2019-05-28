@@ -1,15 +1,49 @@
 const config = require('./config.js');
 const express = require('express');
 const path = require('path');
+const bodyParser = require('body-parser');
 
 const app = express();
 const port = config.port;
 
-app.use('/css', express.static(path.join(config.projectRoot, '/static/dist/css')));
-app.use('/js', express.static(path.join(config.projectRoot, '/static/dist/js')));
+let username = '';
 
-app.get('/', (req, res) => {
-    res.sendFile(`${ config.projectRoot }/static/dist/html/index.html`);
+// Set static route
+app.use('/css', express.static(path.join(config.projectRoot, '/static/css')));
+app.use('/js', express.static(path.join(config.projectRoot, '/static/js')));
+
+// BodyParser for post request
+app.use(bodyParser.urlencoded({ extended: false }))
+app.use(bodyParser.json())
+
+// Set view engine
+app.set('view engine', 'pug');
+app.set('views', path.join(config.projectRoot, '/static/pug'));
+
+// Middleware to set render parameter for all route
+function renderSetting(req, res, next) {
+    res.locals.basedir = path.join(config.projectRoot, '/static/pug');
+    res.locals.staticUrl = config.staticUrl();
+    next();
+};
+
+app.get('/', renderSetting, (req, res) => {
+    res.render('index', {
+        title: 'Home',
+    });
 });
+
+app.post('/', (req, res) => {
+    username = req.body.username;
+    res.redirect('/lobby');
+});
+
+app.get('/lobby', renderSetting, (req, res) => {
+    res.render('lobby', {
+        title: 'Lobby',
+        username: username,
+    });
+});
+
 
 app.listen(port);

@@ -1,0 +1,13 @@
+extends /base.pug
+
+append stylesheets
+  link( rel = 'stylesheet', href = `${ staticUrl }/css/index.css`)
+
+append content
+  form.main__username( action = '/', method = 'post' )
+    input.main__username--text( type = 'text', name = 'username', placeholder = 'Enter your name' )
+    button.main__username--submit( type = 'submit' )
+      i.fas.fa-arrow-right
+
+append scripts
+  script( src = `${ staticUrl }/js/index.js` )
