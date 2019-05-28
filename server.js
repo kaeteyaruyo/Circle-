@@ -9,7 +9,7 @@ app.use('/css', express.static(path.join(config.projectRoot, '/static/dist/css')
 app.use('/js', express.static(path.join(config.projectRoot, '/static/dist/js')));
 
 app.get('/', (req, res) => {
-  res.sendFile(`${ config.projectRoot }/static/dist/html/index.html`);
+    res.sendFile(`${ config.projectRoot }/static/dist/html/index.html`);
 });
 
 app.listen(port);
