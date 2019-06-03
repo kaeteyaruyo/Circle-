@@ -1,0 +1,15 @@
+extends /base.pug
+
+append stylesheets
+  link( rel = 'stylesheet', href = `${ staticUrl }/css/game.css`)
+
+append content
+  section.main__scoreboard
+    p.main__scoreboard--score= '0'
+    p.main__scoreboard--quiz= '10 < x < 13'
+    p.main__scoreboard--timer= '5:00'
+  div#main__canvas
+
+append scripts
+  script( src = 'https://unpkg.com/konva@3.2.7/konva.min.js' )
+  script( src = `${ staticUrl }/js/game.js` )

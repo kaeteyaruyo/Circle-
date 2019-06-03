@@ -1,0 +1,36 @@
+.main__content {
+    width: 100%;
+    display: grid;
+    grid-template-rows: min-content auto;
+    grid-template-areas:
+    'scoreboard'
+    'canvas';
+}
+
+.main__scoreboard {
+    grid-area: scoreboard;
+    display: grid;
+    grid-template-columns: min-content 20vw min-content;
+    grid-template-areas:
+    'score quiz timer';
+    justify-content: center;
+}
+
+.main__scoreboard--score {
+    grid-area: score;
+    justify-self: center;
+}
+
+.main__scoreboard--quiz {
+    grid-area: quiz;
+    justify-self: center;
+}
+
+.main__scoreboard--timer {
+    grid-area: timer;
+    justify-self: center;
+}
+
+#main__canvas {
+    grid-area: canvas;
+}

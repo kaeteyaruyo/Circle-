@@ -53,6 +53,7 @@ body {
     font-family: 'Work Sans', sans-serif;
     font-size: 4rem;
     color: #F6F7F8;
+    cursor: default;
 }
 
 .main__content {

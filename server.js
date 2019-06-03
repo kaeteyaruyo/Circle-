@@ -45,5 +45,12 @@ app.get('/lobby', renderSetting, (req, res) => {
     });
 });
 
+app.get('/tutorial', renderSetting, (req, res) => {
+    res.render('game', {
+        title: 'Tutorial',
+        username: username,
+    });
+});
+
 
 app.listen(port);
