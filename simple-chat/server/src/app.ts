@@ -1,13 +1,15 @@
 import * as express from 'express';
-import * as socketIo from 'socket.io';
 import { createServer, Server } from 'http';
 import * as path from 'path';
-import { IoChat } from './io';
+import * as socketIo from 'socket.io';
+import *  as fs from 'fs';
+import {getRangeRandom , getRandomProblem } from './ramdom';
 
 const app = express();
 const http = createServer(app);
-const iochat = new IoChat(http);
-const io = iochat.getIo();
+const io = socketIo(http);
+
+
 
 app.get('/', (req,res)=>{
     res.sendFile(path.join(__dirname ,'../../client/index.html'));
@@ -18,15 +20,34 @@ app.get('/2', (req,res)=>{
 });
 
 // usernames which are currently connected to the chat
-var usernames = {};
+let usernames = {};
 
 // rooms which are currently available in chat
-var rooms = ['room1','room2','room3'];
+let rooms = ['room1','room2','room3'];
 
-io.sockets.on('connection', function (socket) {
+setInterval(() => {
+	let date = new Date();
+    io.sockets.emit('updateTimer', { 
+		hour: date.getHours(),
+		min: date.getMinutes(),
+		sec: date.getSeconds(),
+	});
+  }, 1000);
+
+setInterval(() => {
+	fs.readFile(path.join(__dirname ,'./problems.json'), (err, data) => {  
+		if (err) throw err;
+		let problems = JSON.parse(data.toString());
+		let problem = getRandomProblem(problems);
+		io.sockets.emit('updateProblem', { problem:problem});
+	}); 
+  }, 3000);
+
+
+io.sockets.on('connection',  (socket) =>{
 
 	// when the client emits 'adduser', this listens and executes
-	socket.on('adduser', function(username){
+	socket.on('adduser', (username)=>{
 		// store the username in the socket session for this client
 		socket.username = username;
 		// store the room name in the socket session for this client
@@ -43,12 +64,12 @@ io.sockets.on('connection', function (socket) {
 	});
 
 	// when the client emits 'sendchat', this listens and executes
-	socket.on('sendchat', function (data) {
+	socket.on('sendchat',  (data)=> {
 		// we tell the client to execute 'updatechat' with 2 parameters
 		io.sockets.in(socket.room).emit('updatechat', socket.username, data);
 	});
 
-	socket.on('switchRoom', function(newroom){
+	socket.on('switchRoom', (newroom)=>{
 		// leave the current room (stored in session)
 		socket.leave(socket.room);
 		// join new room, received as function parameter
@@ -63,7 +84,7 @@ io.sockets.on('connection', function (socket) {
 	});
 
 	// when the user disconnects.. perform this
-	socket.on('disconnect', function(){
+	socket.on('disconnect', ()=>{
 		// remove the username from global usernames list
 		delete usernames[socket.username];
 		// update list of users in chat, client-side
