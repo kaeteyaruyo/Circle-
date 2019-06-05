@@ -33,11 +33,11 @@ function getRandomProblem(problems) {
         var problem = problemList[index];
         if (problem === "x+2x+1") {
             var n = getRangeRandom(1, 11);
-            return "x+2x+1 = " + (n + 1) * (n + 1);
+            return "x+2*x+1 === " + (n + 1) * (n + 1);
         }
         else if (problem === "x-2x+1") {
             var n = getRangeRandom(1, 11);
-            return "x-2x+1 = " + (n - 1) * (n + 1);
+            return "x-2*x+1 === " + (n - 1) * (n + 1);
         }
     }
 }
