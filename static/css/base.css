@@ -1,0 +1,59 @@
+@import url('https://fonts.googleapis.com/earlyaccess/notosanstc.css');
+
+/* reset */
+* {
+    margin: 0;
+    outline: 0;
+    border: 0;
+    padding: 0;
+    box-sizing: border-box;
+
+    font-size: inherit;
+    color: inherit;
+
+    text-decoration: none;
+    list-style: none;
+}
+
+/* body */
+html, body {
+    width: 100%;
+    height: 100%;
+    font-size: 32px;
+    font-family: 'Work Sans', arial, helvetica, sans-serif;
+    background-color: #F6F7F8;
+}
+
+body {
+    display: grid;
+    grid-template-columns: 100%;
+    grid-template-rows: min-content auto;
+    grid-template-areas:
+        "header"
+        "content";
+    justify-items: center;
+}
+
+/* header block */
+.header__content {
+    grid-area: header;
+    width: 100%;
+    height: 20vh;
+    padding: 2.5vh 0;
+    background-color: #2CC0B3;
+    text-align: center;
+    font-size: 4rem;
+}
+
+.header__title {
+    position: relative;
+    top: 50%;
+    transform: translateY(-50%);
+    display: block;
+    color: #F6F7F8;
+    cursor: default;
+}
+
+.main__content {
+    grid-area: content;
+}

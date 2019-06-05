@@ -1,0 +1,65 @@
+.main__content {
+    width: 100%;
+    display: grid;
+    grid-template-rows: min-content auto;
+    grid-template-areas:
+    'scoreboard'
+    'canvas';
+}
+
+.main__scoreboard {
+    grid-area: scoreboard;
+    height: 16vh;
+    display: grid;
+    grid-template-columns: 1fr 2fr 1fr;
+    grid-template-areas:
+    'score_label quiz_label timer_label'
+    'score quiz timer';
+    justify-items: center;
+    justify-content: center;
+    padding: .3rem 0 .7rem;
+    background: #E3E4E5;
+    color: #38595E;
+}
+
+.main__scoreboard--label {
+    padding-bottom: .25rem;
+    font-weight: bold;
+    font-size: 1.2rem;
+}
+
+.main__scoreboard--scoreLabel {
+    grid-area: score_label;
+}
+
+.main__scoreboard--quizLabel {
+    grid-area: quiz_label;
+}
+
+.main__scoreboard--timerLabel {
+    grid-area: timer_label;
+}
+
+.main__scoreboard--data {
+    background: #D5D6D8;
+    box-shadow: 0 3px 5px #A0A2A7;
+    padding: 0 1rem;
+    font-size: 2rem;
+}
+
+.main__scoreboard--score {
+    grid-area: score;
+    width: 8rem;
+}
+
+.main__scoreboard--quiz {
+    grid-area: quiz;
+}
+
+.main__scoreboard--timer {
+    grid-area: timer;
+}
+
+#main__canvas {
+    grid-area: canvas;
+}

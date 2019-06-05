@@ -1,6 +1,9 @@
-module.exports = {
-    protocol: 'http',
+const config = {
     projectRoot: '',
+    protocol: 'http',
     host: '',
     port: '',
+    staticUrl: () => `${ config.protocol }://${ config.host }:${ config.port }`
 }
+
+module.exports = config;
