@@ -1,6 +1,9 @@
+import { passGlobalVariableToCell, createCell } from '/js/game/cell.js'
+import { passGlobalVariableToBullet, createBullet } from '/js/game/bullet.js'
+
 // Declare stage (container of layers)
 const stageWidth = window.innerWidth;
-const stageHeight = window.innerHeight * 0.9;
+const stageHeight = window.innerHeight * 0.85;
 
 const stage = new Konva.Stage({
     container: 'main__canvas',
@@ -18,15 +21,15 @@ const tempLayer = new Konva.Layer();
 stage.add(tempLayer);
 
 // Draw chessboard
-const board = new Konva.RegularPolygon({
+const chessboard = new Konva.RegularPolygon({
     x: stage.width() / 2,
     y: stage.height() * 0.4,
     radius: stage.height() * 0.4,
     sides: 6,
     fill: '#E3E4E5',
 });
-board.rotate(30);
-shapeLayer.add(board);
+chessboard.rotate(30);
+shapeLayer.add(chessboard);
 
 // Draw magazine
 const magazine = new Konva.Rect({
@@ -38,39 +41,45 @@ magazine.x(stage.width() / 2 - magazine.width() / 2);
 magazine.y(stage.height() - magazine.height() - 20);
 shapeLayer.add(magazine);
 
-// Draw nodes on board
-let nodeCounter = 0;
-for(let row = -3; row <= 3; ++row){
-    let radius = (6 - Math.abs(row))
-    for(let colunm = -radius; colunm <= radius; colunm += 2){
-        const node = createNode({
-            initX: stage.width() / 2 + colunm * nodeRadius,
-            initY: stage.height() * 0.4 + row * nodeRadius * Math.sqrt(3),
-            fillColor: '#D5D6D8',
-            strokeColor: '#BABDBF',
-            textColor: '#53575A',
+// Draw cell on chessboard
+passGlobalVariableToCell({
+    stage,
+    shape_layer: shapeLayer
+});
+for(let row = 0; row < 7; ++row){
+    let maxColumn = (7 - Math.abs(row - 3));
+    for(let column = 0; column < maxColumn; ++column){
+        const cell = createCell({
+            row,
+            column,
+            stageWidth: stage.width(),
+            stageHeight: stage.height(),
+            shapeLayer,
         });
 
-        node.name(`node${ (++nodeCounter).toString() }`);
-
-        shapeLayer.add(node);
+        shapeLayer.add(cell);
     }
 }
 
 // Draw nodes in magazine
+passGlobalVariableToBullet({
+    stage,
+    shape_layer: shapeLayer
+});
 for(let i = 0; i < 5; ++i){
-    createBullet(i);
+    shapeLayer.add(createBullet({
+        index: i,
+        team: 1,
+        originX: magazine.x(),
+        originY: magazine.y(),
+    }));
 }
+
+shapeLayer.draw();
 
 // Fire when start to drag something
 stage.on('dragstart', e => {
-    const targetNode = e.target
-
-    // Record starting position, return to this position when drop on illegal place
-    targetNode.startX = targetNode.x();
-    targetNode.startY = targetNode.y();
-
-    targetNode.moveTo(tempLayer);
+    e.target.moveTo(tempLayer);
     shapeLayer.draw();
 });
 
@@ -80,73 +89,75 @@ stage.on('dragmove', e => {
     const shape = shapeLayer.getIntersection(stage.getPointerPosition());
     if (previousShape && shape) {
         if (previousShape !== shape) {
-            // leave from old targer
-            previousShape.fire(
-                'dragleave',
-                {
-                    type: 'dragleave',
-                    target: previousShape,
-                    evt: e.evt
-                },
-                true
-            );
+            // // leave from old targer
+            // previousShape.fire(
+            //     'dragleave',
+            //     {
+            //         type: 'dragleave',
+            //         target: previousShape,
+            //         evt: e.evt
+            //     },
+            //     true
+            // );
 
-            // enter new targer
-            shape.fire(
-                'dragenter',
-                {
-                    type: 'dragenter',
-                    target: shape,
-                    evt: e.evt
-                },
-                true
-            );
+            // // enter new targer
+            // shape.fire(
+            //     'dragenter',
+            //     {
+            //         type: 'dragenter',
+            //         target: shape,
+            //         evt: e.evt
+            //     },
+            //     true
+            // );
             previousShape = shape;
         }
         else {
-            previousShape.fire(
-                'dragover',
-                {
-                    type: 'dragover',
-                    target: previousShape,
-                    evt: e.evt
-                },
-                true
-            );
+            // previousShape.fire(
+            //     'dragover',
+            //     {
+            //         type: 'dragover',
+            //         target: previousShape,
+            //         evt: e.evt
+            //     },
+            //     true
+            // );
         }
     }
     else if (!previousShape && shape) {
         previousShape = shape;
-        shape.fire(
-            'dragenter',
-            {
-                type: 'dragenter',
-                target: shape,
-                evt: e.evt
-            },
-            true
-        );
+        // shape.fire(
+        //     'dragenter',
+        //     {
+        //         type: 'dragenter',
+        //         target: shape,
+        //         evt: e.evt
+        //     },
+        //     true
+        // );
     }
     else if (previousShape && !shape) {
-        previousShape.fire(
-            'dragleave',
-            {
-                type: 'dragleave',
-                target: previousShape,
-                evt: e.evt
-            },
-            true
-        );
+        // previousShape.fire(
+        //     'dragleave',
+        //     {
+        //         type: 'dragleave',
+        //         target: previousShape,
+        //         evt: e.evt
+        //     },
+        //     true
+        // );
         previousShape = undefined;
     }
 });
 
 // Fire when stop dragging something
 stage.on('dragend', e => {
-    const draggedNode = e.target;
+    // DroppedShape may be circle or text, which is cell's children shape
     const droppedShape = shapeLayer.getIntersection(stage.getPointerPosition());
-    const droppedNode = droppedShape.getParent();
-    if(droppedShape && droppedShape.getParent().name().includes('node')) {
+    const cell = droppedShape ? droppedShape.getParent() : null;
+    const bullet = e.target;
+
+    if(cell && cell.name().includes('cell') && cell.owner == 0){
         previousShape.fire(
             'drop',
             {
@@ -156,21 +167,22 @@ stage.on('dragend', e => {
             },
             true
         );
-        // Update dropped node's number
-        droppedNode.number += draggedNode.number;
-        const droppedtext = droppedNode.findOne('Text');
-        droppedtext.text(droppedNode.number);
-        droppedtext.offsetX(droppedtext.width() / 2);
-        droppedtext.offsetY(droppedtext.height() / 2);
+
+        // Add number to cell
+        cell.addNumber(bullet.number, bullet.team);
 
         // Spawn a new bullet and destroy used one
-        createBullet(draggedNode.magazineIndex);
-        draggedNode.destroy();
+        shapeLayer.add(createBullet({
+            index: bullet.bulletIndex,
+            team: bullet.team,
+            originX: magazine.x(),
+            originY: magazine.y(),
+        }));
+        bullet.destroy();
     }
     else {
-        draggedNode.moveTo(shapeLayer);
-        draggedNode.x(draggedNode.startX);
-        draggedNode.y(draggedNode.startY);
+        bullet.moveTo(shapeLayer);
+        bullet.reset();
     }
 
     previousShape = undefined;
@@ -208,62 +220,4 @@ function fitStageIntoParentContainer() {
     stage.height(stageHeight * scale);
     stage.scale({ x: scale, y: scale });
     stage.draw();
-}
-
-// Generate random integer in 0 - (max - 1)
-function randomInt(max) {
-    return Math.floor(Math.random() * Math.floor(max));
-}
-
-// Create a node
-function createNode({ initX, initY, fillColor, strokeColor, textColor }){
-    // Create a node (container of circle and text and data)
-    const node = new Konva.Group({
-        x: initX,
-        y: initY
-    });
-    node.number = randomInt(10);
-
-    // Create a circle
-    const circle = new Konva.Circle({
-        radius: nodeRadius,
-        fill: fillColor,
-        stroke: strokeColor,
-        strokeWidth: 1,
-    });
-
-    // Create a text label to display number
-    const text = new Konva.Text({
-        text: node.number.toString(),
-        fontSize: 50,
-        fontFamily: 'Work Sans',
-        fill: textColor,
-    });
-    text.offsetX(text.width() / 2);
-    text.offsetY(text.height() / 2);
-    node.add(circle);
-    node.add(text);
-    return node;
-}
-
-function createBullet(index){
-    const node = createNode({
-        initX: magazine.x() + nodeRadius  * 2 + index * nodeRadius * 3,
-        initY: magazine.y() + nodeRadius * 1.5,
-        fillColor: '#F4733D',
-        strokeColor: '#913108',
-        textColor: '#FCDCCF',
-    });
-
-    node.magazineIndex = index;
-    node.draggable(true)
-
-    node.on('mouseover', () => {
-        document.body.style.cursor = 'pointer';
-    });
-    node.on('mouseout', () => {
-        document.body.style.cursor = 'default';
-    });
-
-    shapeLayer.add(node);
 }

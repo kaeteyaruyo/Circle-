@@ -5,11 +5,14 @@ append stylesheets
 
 append content
   section.main__scoreboard
-    p.main__scoreboard--score= '0'
-    p.main__scoreboard--quiz= '10 < x < 13'
-    p.main__scoreboard--timer= '5:00'
+    p.main__scoreboard--scoreLabel.main__scoreboard--label Score
+    p.main__scoreboard--score.main__scoreboard--data( align = 'center' )= '0'
+    p.main__scoreboard--quizLabel.main__scoreboard--label Question
+    p.main__scoreboard--quiz.main__scoreboard--data= '10 < x < 13'
+    p.main__scoreboard--timerLabel.main__scoreboard--label Time
+    p.main__scoreboard--timer.main__scoreboard--data= '5:00'
   div#main__canvas
 
 append scripts
   script( src = 'https://unpkg.com/konva@3.2.7/konva.min.js' )
-  script( src = `${ staticUrl }/js/game.js` )
+  script( type = 'module', src = `${ staticUrl }/js/game.js` )
