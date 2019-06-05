@@ -9,21 +9,22 @@
 
 .main__scoreboard {
     grid-area: scoreboard;
-    height: 16vh;
+    max-height: 16vh;
     display: grid;
     grid-template-columns: 1fr 2fr 1fr;
+    grid-template-rows: min-content min-content;
     grid-template-areas:
     'score_label quiz_label timer_label'
     'score quiz timer';
     justify-items: center;
     justify-content: center;
-    padding: .3rem 0 .7rem;
+    padding: .3rem 0 1.2rem;
     background: #E3E4E5;
     color: #38595E;
 }
 
 .main__scoreboard--label {
-    padding-bottom: .25rem;
+    padding-bottom: .5rem;
     font-weight: bold;
     font-size: 1.2rem;
 }

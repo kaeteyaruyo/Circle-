@@ -23,13 +23,13 @@ app.set('views', path.join(config.projectRoot, '/static/pug'));
 // Middleware to set render parameter for all route
 function renderSetting(req, res, next) {
     res.locals.basedir = path.join(config.projectRoot, '/static/pug');
-    res.locals.staticUrl = config.staticUrl();
     next();
 };
 
 app.get('/', renderSetting, (req, res) => {
     res.render('index', {
         title: 'Home',
+        username: '',
     });
 });
 
@@ -39,6 +39,8 @@ app.post('/', (req, res) => {
 });
 
 app.get('/lobby', renderSetting, (req, res) => {
+    if(username === '')
+        res.redirect('/');
     res.render('lobby', {
         title: 'Lobby',
         username: username,
@@ -46,6 +48,8 @@ app.get('/lobby', renderSetting, (req, res) => {
 });
 
 app.get('/tutorial', renderSetting, (req, res) => {
+    if(username === '')
+        res.redirect('/');
     res.render('game', {
         title: 'Tutorial',
         username: username,

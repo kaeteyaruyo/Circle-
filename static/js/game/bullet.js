@@ -2,22 +2,20 @@ const fillColor = [ '#D5D6D8', '#F4733D', '#38595E', ];
 const strokeColor = [ '#BABDBF', '#913108', '#111B1D', ];
 const textColor = [ '#53575A', '#FCDCCF', '#DFEAEC', ];
 
-let shapeLayer = null;
-let stageWidth = null;
-let stageHeight = null;
+let originX = null;
+let originY = null;
 let nodeRadius = null;
 
-function passGlobalVariableToBullet({ stage, shape_layer, }){
-    stageWidth = stage.width();
-    stageHeight = stage.height();
-    shapeLayer = shape_layer;
-    nodeRadius = stage.height() * 0.05;
+function passGlobalVariableToBullet({ node_radius, origin_x, origin_y }){
+    nodeRadius = node_radius;
+    originX = origin_x;
+    originY = origin_y;
 }
-function createBullet({ index, team, originX, originY, }){
+function createBullet({ index, team }){
     // Create bullet object
     const bullet = new Konva.Group({
-        x: originX + nodeRadius  * 2 + index * nodeRadius * 3,
-        y: originY + nodeRadius * 1.5,
+        x: originX + (index - 2) * nodeRadius * 3,
+        y: originY,
         draggable: true,
     });
 
@@ -38,7 +36,7 @@ function createBullet({ index, team, originX, originY, }){
 
     const text = new Konva.Text({
         text: bullet.number.toString(),
-        fontSize: 50,
+        fontSize: 40,
         fontFamily: 'Work Sans',
         fill: textColor[team],
     });

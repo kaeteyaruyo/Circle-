@@ -1,25 +1,26 @@
 const fillColor = [ '#D5D6D8', '#F4733D', '#38595E', ];
 const strokeColor = [ '#BABDBF', '#913108', '#111B1D', ];
 const textColor = [ '#53575A', '#FCDCCF', '#DFEAEC', ];
+const bundleTable = new Map();
 
-let shapeLayer = null;
-let stageWidth = null;
-let stageHeight = null;
+let centerX = null;
+let centerY = null;
 let nodeRadius = null;
+let shapeLayer = null;
 let score = 0;
 
-function passGlobalVariableToCell({ stage, shape_layer, }){
-    stageWidth = stage.width();
-    stageHeight = stage.height();
+function passGlobalVariableToCell({ center_x, center_y, shape_layer, node_radius }){
+    centerX = center_x;
+    centerY = center_y;
     shapeLayer = shape_layer;
-    nodeRadius = stage.height() * 0.05;
+    nodeRadius = node_radius;
 }
 
 function createCell({ row, column, }){
     // Create cell object
     const cell = new Konva.Group({
-        x: stageWidth / 2 + (Math.abs(row - 3) - 6 + 2 * column) * nodeRadius,
-        y: stageHeight * 0.4 + (row - 3) * nodeRadius * Math.sqrt(3),
+        x: centerX + (Math.abs(row - 3) - 6 + 2 * column) * nodeRadius,
+        y: centerY + (row - 3) * nodeRadius * Math.sqrt(3),
     });
 
     // Add member variable
@@ -29,6 +30,7 @@ function createCell({ row, column, }){
     cell.number = randomInt(10);
     cell.owner = 0; // 0 for no one, 1 for red team, 2 for green team
     cell.neighbor = findNeightbor(row, column);
+    bundleTable.set(cell.name(), null);
 
     cell.add(new Konva.Circle({
         radius: nodeRadius,
@@ -39,7 +41,7 @@ function createCell({ row, column, }){
 
     const text = new Konva.Text({
         text: cell.number.toString(),
-        fontSize: 50,
+        fontSize: 40,
         fontFamily: 'Work Sans',
         fill: textColor[cell.owner],
     });
@@ -49,39 +51,70 @@ function createCell({ row, column, }){
     cell.add(text);
 
     // Add member function
-    cell.addNumber = function (number, team){
-        this.number += number;
+    cell.addNumber = (number, team) => {
+        cell.number += number;
 
-        const label = this.findOne('Text');
+        const label = cell.findOne('Text');
         label.text(cell.number);
         label.offsetX(label.width() / 2);
         label.offsetY(label.height() / 2);
 
         if(randomInt(10) > 3){
-            this.freeze(team);
+            cell.freeze(team);
         }
     }
 
-    cell.freeze = function (owner){
+    cell.freeze = (owner) => {
         // Set owner
-        this.owner = owner;
+        cell.owner = owner;
 
         // Change to owner's color
-        const circle = this.find('Circle');
+        const circle = cell.find('Circle');
         circle.fill(fillColor[owner]);
         circle.stroke(strokeColor[owner]);
-        this.find('Text').fill(textColor[owner]);
+        cell.find('Text').fill(textColor[owner]);
 
-        // // Search for bundle
-        // // let bundle = [];
-        // this.neighbor.forEach(n => {
-        //     console.log(shapeLayer.findOne(`.${ n }`).getParent() === shapeLayer);
-        // });
+        // Search for bundle
+        const neighbors = [];
+        cell.neighbor.forEach(n => {
+            const neighborCell = shapeLayer.findOne(`.${ n }`);
+            if(neighborCell.owner === owner){
+                neighbors.push(n);
+            }
+        });
+
+        bundleTable.set(cell.name(), cell.name());
+        neighbors.forEach(n => {
+            const root = findRoot(n)
+            bundleTable.set(root, cell.name());
+        });
+    }
+
+    cell.consume = () => {
+        if(cell.owner !== 0){
+            const root = findRoot(cell.name());
+            const bundle = collectBundle(root).concat(root);
+            const bonus = bundle.length;
+            let totalNumber = 0;
+
+            bundle.forEach(cellName => {
+                const c = shapeLayer.findOne(`.${ cellName }`);
+                totalNumber += c.number;
+                shapeLayer.add(createCell({
+                    row: c.row,
+                    column: c.column,
+                }));
+                c.destroy();
+                shapeLayer.draw();
+            });
+            score += totalNumber * bonus;
+            document.querySelector('.main__scoreboard--score').innerHTML = score.toString();
+        }
     }
 
     // Add event listener
-    cell.on('mouseover', function (){
-        if(this.owner !== 0)
+    cell.on('mouseover', () => {
+        if(cell.owner !== 0)
             document.body.style.cursor = 'pointer';
         else
             document.body.style.cursor = 'default';
@@ -91,18 +124,13 @@ function createCell({ row, column, }){
         document.body.style.cursor = 'default';
     });
 
-    cell.on('click', function() {
-        if(this.owner !== 0){
-            score += this.number;
-            document.querySelector('.main__scoreboard--score').innerHTML = score.toString();
-            shapeLayer.add(createCell({
-                row: this.row,
-                column: this.column,
-            }));
-            this.destroy();
-            shapeLayer.draw();
-        }
-    })
+    cell.on('click', () => {
+        cell.consume();
+    });
+
+    cell.on('tap', () => {
+        cell.consume();
+    });
 
     return cell;
 }
@@ -143,6 +171,27 @@ function findNeightbor(row, column){
         }
     }
     return n;
+}
+
+function collectBundle(cellName){
+    const children = [];
+    bundleTable.forEach((val, key) => {
+        if(key !== cellName && val === cellName)
+            children.push(key);
+    });
+    let grandson = [];
+    children.forEach(c => {
+        grandson = grandson.concat(collectBundle(c));
+    })
+    return children.concat(grandson);
+}
+
+function findRoot(cellName){
+    const parent = bundleTable.get(cellName)
+    if(parent == cellName)
+        return cellName;
+    else
+        return findRoot(parent);
 }
 
 // Generate random integer in 0 - (max - 1)

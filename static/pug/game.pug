@@ -1,7 +1,7 @@
 extends /base.pug
 
 append stylesheets
-  link( rel = 'stylesheet', href = `${ staticUrl }/css/game.css`)
+  link( rel = 'stylesheet', href = `/css/game.css`)
 
 append content
   section.main__scoreboard
@@ -15,4 +15,4 @@ append content
 
 append scripts
   script( src = 'https://unpkg.com/konva@3.2.7/konva.min.js' )
-  script( type = 'module', src = `${ staticUrl }/js/game.js` )
+  script( type = 'module', src = `/js/game.js` )
