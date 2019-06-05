@@ -12,6 +12,7 @@ const Problem = require("./src/Problem");
 const Timer = require("./src/Timer");
 const http = http_1.createServer(app);
 const io = socketIo(http);
+const Io = require("./src/Io");
 
 let username = '';
 
@@ -67,5 +68,6 @@ setInterval( () => {
     Timer.updateTimer(io);
 }, 3000);
 
+Io.createIo(io);
 
 app.listen(port);
