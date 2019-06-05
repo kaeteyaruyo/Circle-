@@ -2,9 +2,8 @@ import * as express from 'express';
 import { createServer, Server } from 'http';
 import * as path from 'path';
 import * as socketIo from 'socket.io';
-import *  as fs from 'fs';
-import {getRangeRandom , getRandomProblem } from './ramdom';
-
+import {updateProblem} from './Problem';
+import {updateTimer} from './Timer';
 const app = express();
 const http = createServer(app);
 const io = socketIo(http);
@@ -26,21 +25,11 @@ let usernames = {};
 let rooms = ['room1','room2','room3'];
 
 setInterval(() => {
-	let date = new Date();
-    io.sockets.emit('updateTimer', { 
-		hour: date.getHours(),
-		min: date.getMinutes(),
-		sec: date.getSeconds(),
-	});
+	updateProblem(io);
   }, 1000);
 
 setInterval(() => {
-	fs.readFile(path.join(__dirname ,'./problems.json'), (err, data) => {  
-		if (err) throw err;
-		let problems = JSON.parse(data.toString());
-		let problem = getRandomProblem(problems);
-		io.sockets.emit('updateProblem', { problem:problem});
-	}); 
+	updateTimer(io);
   }, 3000);
 
 
