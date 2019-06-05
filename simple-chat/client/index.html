@@ -26,6 +26,14 @@
 			}
 		});
 	});
+	socket.on('updateTimer',(timer)=>{
+		let time = `${timer.hour} : ${timer.min} : ${timer.sec}`
+		$('#timer').html(time)
+	});
+	socket.on('updateProblem',(data)=>{
+		let myproblem = `${data.problem}`
+		$('#problem').html(myproblem)
+	});
 
 	function switchRoom(room){
 		socket.emit('switchRoom', room);
@@ -59,4 +67,10 @@
 	<div id="conversation"></div>
 	<input id="data" style="width:200px;" />
 	<input type="button" id="datasend" value="send" />
+</div>
+<div> <p>time right now</p>
+	<div id = "timer">not get time yet!</div>
+</div>
+<div> <p>problem</p>
+	<div id = "problem">not get problem yet!</div>
 </div>
