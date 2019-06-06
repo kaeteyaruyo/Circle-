@@ -1,10 +1,17 @@
-function updateTimer(io){
-    let date = new Date();
+function updateTimer(io,Timer){
+    let now = new Date().getTime();
+    let start = Timer.getTime();
+    let passTime = 300 - Math.floor((now - start)/1000);
+    let min = Math.floor(passTime / 60)
+    let sec = Math.floor(passTime % 60)
     io.sockets.emit('updateTimer', { 
-        hour: date.getHours(),
-        min: date.getMinutes(),
-        sec: date.getSeconds(),
+        min: min,
+        sec: sec,
     });
 }
 
-export {updateTimer}
+function createTimer(){
+    return new Date();
+}
+
+export {updateTimer,createTimer}

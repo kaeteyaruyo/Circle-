@@ -1,6 +1,9 @@
+import {updateProblem} from './Problem';
+import {updateTimer,createTimer} from './Timer';
+
 // usernames which are currently connected to the chat
 let usernames = {};
-
+let gameRoom = {};
 // rooms which are currently available in chat
 let rooms = ['room1','room2','room3'];
 
@@ -54,7 +57,21 @@ function createIo(io){
             socket.broadcast.emit('updatechat', 'SERVER', socket.username + ' has disconnected');
             socket.leave(socket.room);
         });
+        socket.on('startTimer',(room)=>{
+            let Timer = createTimer();
+            gameRoom[room] = Timer;
+            setInterval(()=>{
+                updateTimer(io,Timer);
+            },1000);
+        })
+        socket.on('startProblem',(room)=>{
+            setInterval(()=>{
+                updateProblem(io);
+            },5000);
+        })
     });
 }
+
+
 
 export {createIo}

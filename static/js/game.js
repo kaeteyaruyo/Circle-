@@ -15,6 +15,10 @@ socket.on('updateProblem', (data) => {
     cellUpdateQuiz(data.problem);
 });
 
+socket.emit('startTimer', "room");
+socket.emit('startProblem', "room");
+
+
 // Draw cell on chessboard
 passGlobalVariableToCell({
     center_x: stage.findOne('.chessboard').x(),

@@ -1,5 +1,5 @@
 import *  as fs from 'fs';
-import {getRangeRandom , getRandomProblem } from './ramdom';
+import {getRangeRandom , getRandomProblem } from './Ramdom';
 import * as path from 'path';
 
 function updateProblem(io){

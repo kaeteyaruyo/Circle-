@@ -1,11 +1,17 @@
 "use strict";
 exports.__esModule = true;
-function updateTimer(io) {
-    var date = new Date();
+function updateTimer(io, Timer) {
+    var now = new Date().getTime();
+    var start = Timer.getTime();
+    var passTime = now - start;
     io.sockets.emit('updateTimer', {
-        hour: date.getHours(),
-        min: date.getMinutes(),
-        sec: date.getSeconds()
+        hour: 0,
+        min: 0,
+        sec: passTime
     });
 }
 exports.updateTimer = updateTimer;
+function createTimer() {
+    return new Date();
+}
+exports.createTimer = createTimer;

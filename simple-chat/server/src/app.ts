@@ -23,9 +23,9 @@ app.get('/2', (req,res)=>{
 setInterval(() => {
 	updateProblem(io);
   }, 1000);
-
+let Timer = new Date();
 setInterval(() => {
-	updateTimer(io);
+	updateTimer(io,Timer);
   }, 3000);
 
 createIo(io);

@@ -1,6 +1,9 @@
 "use strict";
 exports.__esModule = true;
+var Problem_1 = require("./Problem");
+var Timer_1 = require("./Timer");
 var usernames = {};
+var gameRoom = {};
 var rooms = ['room1', 'room2', 'room3'];
 function createIo(io) {
     io.sockets.on('connection', function (socket) {
@@ -30,6 +33,18 @@ function createIo(io) {
             io.sockets.emit('updateusers', usernames);
             socket.broadcast.emit('updatechat', 'SERVER', socket.username + ' has disconnected');
             socket.leave(socket.room);
+        });
+        socket.on('startTimer', function (room) {
+            var Timer = Timer_1.createTimer();
+            gameRoom[room] = Timer;
+            setInterval(function () {
+                Timer_1.updateTimer(io, Timer);
+            }, 1000);
+        });
+        socket.on('startProblem', function (room) {
+            setInterval(function () {
+                Problem_1.updateProblem(io);
+            }, 5000);
         });
     });
 }
