@@ -1,14 +1,16 @@
 const config = require('./config.js');
+const express = require('express');
 const path = require('path');
 const bodyParser = require('body-parser');
 
-const app = require('express')();
+const app = express();
 const server = require('http').Server(app);
 const port = config.port;
 
 const Problem = require("./server/Problem.js");
 const Timer = require("./server/Timer.js");
-const io = require("./server/Io.js").createIo(require("socket.io")(server));
+const io = require("socket.io")(server);
+require("./server/Io.js").createIo(io);
 
 let username = '';
 
