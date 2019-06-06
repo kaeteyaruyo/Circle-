@@ -6,6 +6,14 @@ const bodyParser = require('body-parser');
 const app = express();
 const port = config.port;
 
+const http_1 = require("http");
+const socketIo = require("socket.io");
+const Problem = require("./src/Problem");
+const Timer = require("./src/Timer");
+const http = http_1.createServer(app);
+const io = socketIo(http);
+const Io = require("./src/Io");
+
 let username = '';
 
 // Set static route
@@ -60,5 +68,14 @@ app.get('/tutorial', renderSetting, (req, res) => {
     }
 });
 
+setInterval( () => {
+    Problem.updateProblem(io);
+}, 1000);
+
+setInterval( () => {
+    Timer.updateTimer(io);
+}, 3000);
+
+Io.createIo(io);
 
 app.listen(port);

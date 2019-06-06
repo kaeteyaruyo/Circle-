@@ -1,22 +1,34 @@
 import * as express from 'express';
-import * as socketIo from 'socket.io';
 import { createServer, Server } from 'http';
 import * as path from 'path';
-
+import * as socketIo from 'socket.io';
+import {updateProblem} from './Problem';
+import {updateTimer} from './Timer';
+import {createIo} from './Io';
 const app = express();
 const http = createServer(app);
 const io = socketIo(http);
 
- 
+
+
 app.get('/', (req,res)=>{
     res.sendFile(path.join(__dirname ,'../../client/index.html'));
 });
 
-io.on('connection', (socket) => {
-    socket.on('chat message', (msg) => {
-        io.emit('chat message', msg);
-    });
+app.get('/2', (req,res)=>{
+    res.sendFile(path.join(__dirname ,'../../client/index2.html'));
 });
+
+
+setInterval(() => {
+	updateProblem(io);
+  }, 1000);
+
+setInterval(() => {
+	updateTimer(io);
+  }, 3000);
+
+createIo(io);
 
 http.listen(3000, ()=> {
     console.log('Example app listening on port 3000!');
