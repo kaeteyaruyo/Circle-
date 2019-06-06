@@ -41,19 +41,23 @@ app.post('/', (req, res) => {
 app.get('/lobby', renderSetting, (req, res) => {
     if(username === '')
         res.redirect('/');
-    res.render('lobby', {
-        title: 'Lobby',
-        username: username,
-    });
+    else{
+        res.render('lobby', {
+            title: 'Lobby',
+            username: username,
+        });
+    }
 });
 
 app.get('/tutorial', renderSetting, (req, res) => {
     if(username === '')
         res.redirect('/');
-    res.render('game', {
-        title: 'Tutorial',
-        username: username,
-    });
+    else{
+        res.render('game', {
+            title: 'Tutorial',
+            username: username,
+        });
+    }
 });
 
 

@@ -104,6 +104,7 @@ function createCell({ row, column, }){
                     row: c.row,
                     column: c.column,
                 }));
+                bundleTable[cellName] = null;
                 c.destroy();
                 shapeLayer.draw();
             });
