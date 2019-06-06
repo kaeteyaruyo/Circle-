@@ -32,15 +32,14 @@ app.use( session( {
     resave:            false,
     saveUninitialized: false,
     cookie:            {
-        domain:   config.host,
+        // domain:   config.host,
         httpOnly: true,
         maxAge: 10 * 60 * 1000, // 10 minutes
-        sameSite: true,
     },
 } ) );
 
 app.get('/', utils.renderSetting, (req, res) => {
-    if ( req.session && req.session.username )
+    if ( req.session.username )
         res.redirect('/lobby');
     else{
         res.render('index', {
@@ -75,10 +74,10 @@ app.get('/tutorial', utils.renderSetting, utils.checkLogin, (req, res) => {
 
 setInterval( () => {
     Problem.updateProblem(io);
-}, 1000);
+}, 5000);
 
 setInterval( () => {
     Timer.updateTimer(io);
-}, 3000);
+}, 1000);
 
 server.listen(config.port);

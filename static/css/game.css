@@ -50,7 +50,7 @@
 
 .main__scoreboard--score {
     grid-area: score;
-    width: 8rem;
+    width: 10rem;
 }
 
 .main__scoreboard--quiz {
@@ -59,6 +59,7 @@
 
 .main__scoreboard--timer {
     grid-area: timer;
+    width: 7rem;
 }
 
 #main__canvas {

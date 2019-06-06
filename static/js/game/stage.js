@@ -185,6 +185,16 @@ function createStage(width, height, createBullet){
         stage.scale({ x: scale, y: scale });
         stage.draw();
     }
+
+    stage.updateTimer = (time) => {
+        document.querySelector('.main__scoreboard--timer').innerHTML = time;
+        // check when timer equals to 0:00
+    }
+
+    stage.updateQuiz = (quiz) => {
+        document.querySelector('.main__scoreboard--quiz').innerHTML = quiz;
+        // check when timer equals to 0:00
+    }
     return stage;
 }
 

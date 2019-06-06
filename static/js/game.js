@@ -1,9 +1,19 @@
 import { createStage, } from '/js/game/stage.js'
-import { passGlobalVariableToCell, createCell } from '/js/game/cell.js'
+import { passGlobalVariableToCell, createCell, cellUpdateQuiz } from '/js/game/cell.js'
 import { passGlobalVariableToBullet, createBullet } from '/js/game/bullet.js'
 
+const socket = io(window.location.origin);
 const stage = createStage(window.innerWidth, window.innerHeight * 0.85, createBullet);
 const shapeLayer = stage.findOne('.shapeLayer');
+
+socket.on('updateTimer', (timer) => {
+    stage.updateTimer(`${ timer.min }:${ timer.sec.toString().padStart(2, '0') }`);
+});
+
+socket.on('updateProblem', (data) => {
+    stage.updateQuiz(data.problem);
+    cellUpdateQuiz(data.problem);
+});
 
 // Draw cell on chessboard
 passGlobalVariableToCell({

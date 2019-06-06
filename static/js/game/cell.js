@@ -7,6 +7,7 @@ let centerX = null;
 let centerY = null;
 let nodeRadius = null;
 let shapeLayer = null;
+let currentQuiz = '';
 let score = 0;
 
 function passGlobalVariableToCell({ center_x, center_y, shape_layer, node_radius }){
@@ -59,9 +60,9 @@ function createCell({ row, column, }){
         label.offsetX(label.width() / 2);
         label.offsetY(label.height() / 2);
 
-        if(randomInt(10) > 3){
+        const x = cell.number;
+        if(eval(currentQuiz))
             cell.freeze(team);
-        }
     }
 
     cell.freeze = (owner) => {
@@ -136,6 +137,10 @@ function createCell({ row, column, }){
     return cell;
 }
 
+function cellUpdateQuiz(quiz){
+    currentQuiz = quiz;
+}
+
 function findNeightbor(row, column){
     const columnInrow = [ 4, 5, 6, 7, 6, 5, 4, ];
     const n = [];
@@ -200,4 +205,19 @@ function randomInt(max) {
     return Math.floor(Math.random() * Math.floor(max));
 }
 
-export { passGlobalVariableToCell, createCell };
+function isSquare(x){
+    return [1, 4, 9, 16, 25, 36, 49, 64, 81].includes(x);
+}
+function isPrime(x){
+    return [2, 3, 5, 7, 11, 13, 17, 19, 23, 29, 31, 37, 41, 43, 47, 53, 59, 61, 67, 71, 73, 79, 83, 89, 97].includes(x);
+}
+
+function inFibonacci(x){
+    return [0, 1, 2, 3, 5, 8, 13, 21, 34, 55, 89].includes(x);
+}
+
+function isPower2(x){
+    return [1, 2, 4, 8, 16, 32, 64].includes(x);
+}
+
+export { passGlobalVariableToCell, createCell, cellUpdateQuiz };
