@@ -1,18 +1,17 @@
 const config = require('./config.js');
 const express = require('express');
+const session = require('express-session');
 const path = require('path');
 const bodyParser = require('body-parser');
 
-const app = express();
-const server = require('http').Server(app);
-const port = config.port;
-
 const Problem = require("./server/Problem.js");
 const Timer = require("./server/Timer.js");
+const utils = require("./server/utils.js");
+
+const app = express();
+const server = require('http').Server(app);
 const io = require("socket.io")(server);
 require("./server/Io.js").createIo(io);
-
-let username = '';
 
 // Set static route
 app.use('/css', express.static(path.join(config.projectRoot, '/static/css')));
@@ -22,48 +21,56 @@ app.use('/js', express.static(path.join(config.projectRoot, '/static/js')));
 app.use(bodyParser.urlencoded({ extended: false }))
 app.use(bodyParser.json())
 
-// Set view engine
+// Setup view engine
 app.set('view engine', 'pug');
 app.set('views', path.join(config.projectRoot, '/static/pug'));
 
-// Middleware to set render parameter for all route
-function renderSetting(req, res, next) {
-    res.locals.basedir = path.join(config.projectRoot, '/static/pug');
-    next();
-};
+// Setup session
+app.use( session( {
+    secret: 'rhOo03narefOzYOWfFwinC7uX4aVZYvVVbibZ3nSyQc',
+    name:              'circle++',
+    resave:            false,
+    saveUninitialized: false,
+    cookie:            {
+        domain:   config.host,
+        httpOnly: true,
+        maxAge: 10 * 60 * 1000, // 10 minutes
+        sameSite: true,
+    },
+} ) );
 
-app.get('/', renderSetting, (req, res) => {
-    res.render('index', {
-        title: 'Home',
-        username: '',
-    });
+app.get('/', utils.renderSetting, (req, res) => {
+    if ( req.session && req.session.username )
+        res.redirect('/lobby');
+    else{
+        res.render('index', {
+            title: 'Home',
+            username: '',
+        });
+    }
 });
 
 app.post('/', (req, res) => {
-    username = req.body.username;
-    res.redirect('/lobby');
+    if( req.body.username && !req.session.username ){
+        req.session.username = req.body.username;
+        res.redirect('/lobby');
+    }
+    else
+        res.redirect('/');
 });
 
-app.get('/lobby', renderSetting, (req, res) => {
-    if(username === '')
-        res.redirect('/');
-    else{
-        res.render('lobby', {
-            title: 'Lobby',
-            username: username,
-        });
-    }
+app.get('/lobby', utils.renderSetting, utils.checkLogin, (req, res) => {
+    res.render('lobby', {
+        title: 'Lobby',
+        username: req.session.username,
+    });
 });
 
-app.get('/tutorial', renderSetting, (req, res) => {
-    if(username === '')
-        res.redirect('/');
-    else{
-        res.render('game', {
-            title: 'Tutorial',
-            username: username,
-        });
-    }
+app.get('/tutorial', utils.renderSetting, utils.checkLogin, (req, res) => {
+    res.render('game', {
+        title: 'Tutorial',
+        username: req.session.username,
+    });
 });
 
 setInterval( () => {
@@ -74,4 +81,4 @@ setInterval( () => {
     Timer.updateTimer(io);
 }, 3000);
 
-server.listen(port);
+server.listen(config.port);
