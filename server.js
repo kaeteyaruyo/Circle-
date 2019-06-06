@@ -1,18 +1,14 @@
 const config = require('./config.js');
-const express = require('express');
 const path = require('path');
 const bodyParser = require('body-parser');
 
-const app = express();
+const app = require('express')();
+const server = require('http').Server(app);
 const port = config.port;
 
-const http_1 = require("http");
-const socketIo = require("socket.io");
-const Problem = require("./src/Problem");
-const Timer = require("./src/Timer");
-const http = http_1.createServer(app);
-const io = socketIo(http);
-const Io = require("./src/Io");
+const Problem = require("./server/Problem.js");
+const Timer = require("./server/Timer.js");
+const io = require("./server/Io.js").createIo(require("socket.io")(server));
 
 let username = '';
 
@@ -76,6 +72,4 @@ setInterval( () => {
     Timer.updateTimer(io);
 }, 3000);
 
-Io.createIo(io);
-
-app.listen(port);
+server.listen(port);
