@@ -15,8 +15,7 @@ socket.on('updateProblem', (data) => {
     cellUpdateQuiz(data.problem);
 });
 
-socket.emit('startTimer', "room");
-socket.emit('startProblem', "room");
+socket.emit('startGame', "learningRoom");
 
 
 // Draw cell on chessboard

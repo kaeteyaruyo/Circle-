@@ -2,7 +2,7 @@ function getRangeRandom(min,max){
     return Math.floor(Math.random()*max)+min;
 };
 
-function getRandomProblem(problems : JSON){
+function getRandomProblem(problems){
     let keys = problems['keys'];
     let indexOfKeys = getRangeRandom(0,3);
     let problemOfClass = keys[indexOfKeys];
