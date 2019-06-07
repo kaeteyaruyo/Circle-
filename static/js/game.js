@@ -6,17 +6,16 @@ import { passGlobalVariableToBullet, createBullet } from '/js/game/bullet.js'
 const stage = createStage(window.innerWidth, window.innerHeight - document.querySelector('.main__scoreboard').offsetHeight, createBullet);
 const shapeLayer = stage.findOne('.shapeLayer');
 
-// socket.on('updateTimer', (timer) => {
-//     stage.updateTimer(`${ timer.min }:${ timer.sec.toString().padStart(2, '0') }`);
-// });
+socket.emit('startGame', "learningRoom");
 
-// socket.on('updateProblem', (data) => {
-//     stage.updateQuiz(data.problem);
-//     cellUpdateQuiz(data.problem);
-// });
+socket.on('updateTimer', (timer) => {
+    stage.updateTimer(`${ timer.min }:${ timer.sec.toString().padStart(2, '0') }`);
+});
 
-// socket.emit('startTimer', "room");
-// socket.emit('startProblem', "room");
+socket.on('updateProblem', (data) => {
+    stage.updateQuiz(data.problem);
+    cellUpdateQuiz(data.problem);
+});
 
 // Draw cell on chessboard
 passGlobalVariableToCell({

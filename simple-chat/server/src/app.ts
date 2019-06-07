@@ -20,14 +20,6 @@ app.get('/2', (req,res)=>{
 });
 
 
-setInterval(() => {
-	updateProblem(io);
-  }, 1000);
-let Timer = new Date();
-setInterval(() => {
-	updateTimer(io,Timer);
-  }, 3000);
-
 createIo(io);
 
 http.listen(3000, ()=> {

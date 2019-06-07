@@ -34,17 +34,36 @@ function createIo(io) {
             socket.broadcast.emit('updatechat', 'SERVER', socket.username + ' has disconnected');
             socket.leave(socket.room);
         });
-        socket.on('startTimer', function (room) {
-            var Timer = Timer_1.createTimer();
-            gameRoom[room] = Timer;
-            setInterval(function () {
-                Timer_1.updateTimer(io, Timer);
-            }, 1000);
+        socket.on('startGame', function (room) {
+            if (typeof gameRoom[room] !== 'undefined') {
+                socket.room = room;
+                socket.join(room);
+            }
+            else {
+                var timer_1 = Timer_1.createTimer();
+                gameRoom[room] = {};
+                gameRoom[room]["timer"] = timer_1;
+                var timerFun = setInterval(function () {
+                    Timer_1.updateTimer(io, timer_1, socket);
+                }, 1000);
+                var problemFun = setInterval(function () {
+                    Problem_1.updateProblem(io, room, socket);
+                }, 5000);
+                gameRoom[room]["timerFun"] = timerFun;
+                gameRoom[room]["problemFun"] = problemFun;
+                socket.room = room;
+                socket.join(room);
+            }
         });
-        socket.on('startProblem', function (room) {
-            setInterval(function () {
-                Problem_1.updateProblem(io);
-            }, 5000);
+        socket.on('closeGame', function (room) {
+            if (typeof gameRoom[room] !== 'undefined') {
+                socket.room = "";
+                socket.leave(room);
+                var timerFun = gameRoom[room]["timerFun"];
+                var problemFun = gameRoom[room]["problemFun"];
+                clearInterval(timerFun);
+                clearInterval(problemFun);
+            }
         });
     });
 }
