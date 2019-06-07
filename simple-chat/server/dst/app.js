@@ -19,8 +19,9 @@ app.get('/2', function (req, res) {
 setInterval(function () {
     Problem_1.updateProblem(io);
 }, 1000);
+var Timer = new Date();
 setInterval(function () {
-    Timer_1.updateTimer(io);
+    Timer_1.updateTimer(io, Timer);
 }, 3000);
 Io_1.createIo(io);
 http.listen(3000, function () {

@@ -72,12 +72,5 @@ app.get('/tutorial', utils.renderSetting, utils.checkLogin, (req, res) => {
     });
 });
 
-setInterval( () => {
-    Problem.updateProblem(io);
-}, 5000);
-
-setInterval( () => {
-    Timer.updateTimer(io);
-}, 1000);
 
 server.listen(config.port);
