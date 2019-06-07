@@ -1,12 +1,12 @@
 "use strict";
 exports.__esModule = true;
-function updateTimer(io, Timer) {
+function updateTimer(io, Timer, socket) {
     var now = new Date().getTime();
     var start = Timer.getTime();
     var passTime = 300 - Math.floor((now - start) / 1000);
     var min = Math.floor(passTime / 60);
     var sec = Math.floor(passTime % 60);
-    io.sockets.emit('updateTimer', {
+    io.sockets["in"](socket.room).emit('updateTimer', {
         min: min,
         sec: sec
     });

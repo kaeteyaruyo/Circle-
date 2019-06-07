@@ -57,18 +57,37 @@ function createIo(io){
             socket.broadcast.emit('updatechat', 'SERVER', socket.username + ' has disconnected');
             socket.leave(socket.room);
         });
-        socket.on('startTimer',(room)=>{
-            let Timer = createTimer();
-            gameRoom[room] = Timer;
-            setInterval(()=>{
-                updateTimer(io,Timer);
-            },1000);
-        })
-        socket.on('startProblem',(room)=>{
-            setInterval(()=>{
-                updateProblem(io);
-            },5000);
-        })
+        socket.on('startGame',(room)=>{
+            if(typeof gameRoom[room] !== 'undefined'){
+                socket.room = room;
+                socket.join(room);
+            }
+            else{
+                let timer = createTimer();
+                gameRoom[room] = {};
+                gameRoom[room]["timer"] = timer;
+                let timerFun = setInterval(()=>{
+                    updateTimer(io,timer,socket);
+                },1000);
+                let problemFun = setInterval(()=>{
+                    updateProblem(io,room,socket);
+                },5000);
+                gameRoom[room]["timerFun"] = timerFun;
+                gameRoom[room]["problemFun"] = problemFun;
+                socket.room = room;
+                socket.join(room);
+            }
+        });
+        socket.on('closeGame',(room)=>{
+            if(typeof gameRoom[room] !== 'undefined'){
+                socket.room = "";
+                socket.leave(room);
+                let timerFun = gameRoom[room]["timerFun"];
+                let problemFun = gameRoom[room]["problemFun"];
+                clearInterval(timerFun);
+                clearInterval(problemFun);
+            }
+        });
     });
 }
 
