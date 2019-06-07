@@ -2,7 +2,7 @@ import { createStage, } from '/js/game/stage.js'
 import { passGlobalVariableToCell, createCell, cellUpdateQuiz } from '/js/game/cell.js'
 import { passGlobalVariableToBullet, createBullet } from '/js/game/bullet.js'
 
-// const socket = io(window.location.origin);
+const socket = io(window.location.origin);
 const stage = createStage(window.innerWidth, window.innerHeight - document.querySelector('.main__scoreboard').offsetHeight, createBullet);
 const shapeLayer = stage.findOne('.shapeLayer');
 
