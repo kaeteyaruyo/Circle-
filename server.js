@@ -3,10 +3,7 @@ const express = require('express');
 const session = require('express-session');
 const path = require('path');
 const bodyParser = require('body-parser');
-
-const Problem = require("./server/Problem.js");
-const Timer = require("./server/Timer.js");
-const utils = require("./server/utils.js");
+const middleware = require("./server/middleware.js");
 
 const app = express();
 const server = require('http').Server(app);
@@ -38,7 +35,7 @@ app.use( session( {
     },
 } ) );
 
-app.get('/', utils.renderSetting, (req, res) => {
+app.get('/', middleware.renderSetting, (req, res) => {
     if ( req.session.username )
         res.redirect('/lobby');
     else{
@@ -58,19 +55,18 @@ app.post('/', (req, res) => {
         res.redirect('/');
 });
 
-app.get('/lobby', utils.renderSetting, utils.checkLogin, (req, res) => {
+app.get('/lobby', middleware.renderSetting, middleware.checkLogin, (req, res) => {
     res.render('lobby', {
         title: 'Lobby',
         username: req.session.username,
     });
 });
 
-app.get('/tutorial', utils.renderSetting, utils.checkLogin, (req, res) => {
+app.get('/tutorial', middleware.renderSetting, middleware.checkLogin, (req, res) => {
     res.render('game', {
         title: 'Tutorial',
         username: req.session.username,
     });
 });
-
 
 server.listen(config.port);

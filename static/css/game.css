@@ -24,7 +24,7 @@
 }
 
 .main__scoreboard--label {
-    padding-bottom: .5rem;
+    padding: .5rem 0;
     font-weight: bold;
     font-size: 1.2rem;
 }
@@ -44,24 +44,53 @@
 .main__scoreboard--data {
     background: #D5D6D8;
     box-shadow: 0 3px 5px #A0A2A7;
-    padding: 0 1rem;
+    margin: 0 1rem;
     font-size: 2rem;
 }
 
 .main__scoreboard--score {
     grid-area: score;
-    width: 10rem;
+    width: 9rem;
 }
 
 .main__scoreboard--quiz {
     grid-area: quiz;
+    width: 15rem;
 }
 
 .main__scoreboard--timer {
     grid-area: timer;
-    width: 7rem;
+    width: 6rem;
 }
 
 #main__canvas {
     grid-area: canvas;
+}
+
+@media only screen and (max-width: 600px) {
+    .main__scoreboard {
+        max-height: 26vh;
+        grid-template-columns: 1fr 1fr;
+        grid-template-rows: min-content min-content min-content min-content;
+        grid-template-areas:
+        'score_label timer_label'
+        'score timer'
+        'quiz_label quiz_label'
+        'quiz quiz';
+    }
+
+    .main__scoreboard--score {
+        grid-area: score;
+        width: 9rem;
+    }
+
+    .main__scoreboard--quiz {
+        grid-area: quiz;
+        width: 15rem;
+    }
+
+    .main__scoreboard--timer {
+        grid-area: timer;
+        width: 6rem;
+    }
 }
