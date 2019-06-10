@@ -93,20 +93,20 @@ module.exports = class CircleIO{
     }
 
     protected createRoom(io,socket,username){
-        if(typeof this.gameRoom[username] !== 'undefined'){
-            socket.emit('updateRoom',"error roomName conflict");
+        if(this.gameRoom[username] !== undefined){
+            socket.emit('createRoom',"error roomName conflict");
         }
         else{
             this.roomCount = this.roomCount + 1;
             this.gameRoom[username] = {};
             this.gameRoom[username]["players"] = {};
-            this.gameRoom[username]["players"][username] = {
-                "team" : 1,
-                "ready" : false
-            };
+            // this.gameRoom[username]["players"][username] = {
+            //     "team" : 1,
+            //     "ready" : false
+            // };
             this.gameRoom[username]["owner"] = username;
             this.gameRoom[username]["gaming"] = false;
-            this.gameRoom[username]["redTeamCount"] = 1;
+            this.gameRoom[username]["redTeamCount"] = 0;
             this.gameRoom[username]["greenTeamCount"] = 0;
             this.gameRoom[username]["redPoint"] = 0;
             this.gameRoom[username]["greenPoint"] = 0;
@@ -128,18 +128,21 @@ module.exports = class CircleIO{
     }
 
     protected joinRoom(io,socket,username,roomName){
+        // console.log(roomName);
+        // console.log(this.gameRoom);
+        socket.room = roomName;
         let thisRoom = this.gameRoom[roomName];
         let joinPerson = username;
-        if(thisRoom !== 'undefined'){
+        if(thisRoom !== undefined){
             socket.join(roomName);
             let team;
             if(thisRoom["redTeamCount"] > thisRoom["greenTeamCount"]){
-                team = 1;
-                thisRoom["redTeamCount"] = thisRoom["redTeamCount"] + 1;
-            }
-            else{
                 team = 2;
                 thisRoom["greenTeamCount"] = thisRoom["greenTeamCount"] + 1;
+            }
+            else{
+                team = 1;
+                thisRoom["redTeamCount"] = thisRoom["redTeamCount"] + 1;
             }
             thisRoom["players"][username] = {
                 "team" : team,
@@ -161,9 +164,9 @@ module.exports = class CircleIO{
         let thisRoom = this.gameRoom[roomName];
         let leavePlayer = username;
         // open room person leave room
-        if(thisRoom !== 'undefined'){
+        if(thisRoom !== undefined){
             let players = thisRoom["players"];
-            if(players[username] !== 'undefined'){
+            if(players[username] !== undefined){
                 if(players[username]["team"] === 1){
                     thisRoom["redTeamCount"] = thisRoom["redTeamCount"] - 1;
                 }
@@ -179,7 +182,7 @@ module.exports = class CircleIO{
                 })
             }
             else{
-                socket.emit('updateRoom',`error when ${username} leave ${roomName} username not found`);
+                socket.emit('leaveRoom',`error when ${username} leave ${roomName} username not found`);
             }
         }
     }
@@ -195,7 +198,9 @@ module.exports = class CircleIO{
                 attendance : number
             })
         });
-        socket.emit('enterLobby',result)
+        socket.emit('enterLobby',{
+            rooms : result
+        })
     }
 
     protected setUserReady(io,socket,username,roomName){
@@ -209,7 +214,7 @@ module.exports = class CircleIO{
     protected startTutorial(io,socket,roomName){
         let timer;
         // toturial
-        if(typeof this.tutorialRoom[roomName] !== 'undefined'){
+        if(this.tutorialRoom[roomName] !== undefined){
             if(this.tutorialRoom[roomName]["gaming"]){
                 timer = this.tutorialRoom[roomName]["timer"];
             }
@@ -244,7 +249,7 @@ module.exports = class CircleIO{
 
     protected startGame(io,socket,roomName){
         let timer;
-        if(typeof this.gameRoom[roomName] !== 'undefined'){
+        if(this.gameRoom[roomName] !== undefined){
             // for real 6 vs 6
             if(this.gameRoom[roomName]["gaming"]){
                 timer = this.gameRoom[roomName]["timer"];
@@ -273,7 +278,7 @@ module.exports = class CircleIO{
     }
 
     protected closeGame(io,socket,roomName){
-        if(typeof this.gameRoom[roomName] !== 'undefined'){
+        if(this.gameRoom[roomName] !== undefined){
             socket.room = "";
             socket.leave(roomName);
             let timerFun = this.gameRoom[roomName]["timerFun"];
@@ -285,7 +290,7 @@ module.exports = class CircleIO{
     }
 
     protected updatePoint(io,socket,roomName,point,team){
-        if(typeof this.gameRoom[roomName] !== 'undefined'){
+        if(this.gameRoom[roomName] !== undefined){
             if(team ==='1'){
                 this.gameRoom[roomName]["redPoint"] = point;
             }

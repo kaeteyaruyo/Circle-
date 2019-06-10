@@ -6,7 +6,7 @@ const user = {
 };
 
 const room = {
-    name: 0,
+    name: '',
     owner: '',
     playerCount: [ , 0, 0], // for team 1 and team 2
     playerInfo: {},
@@ -29,7 +29,7 @@ socket.on('enterLobby', (data) => {
     data.rooms.forEach(room => {
         document.querySelector('.main__room--create').insertAdjacentHTML('beforebegin', generateRoomHTML(room.roomName, room.attendance));
         document.querySelector(`#room_${ room.roomName }`).addEventListener('click', () => { joinRoom(room.roomName) });
-        if(username === room.roomName)
+        if(user.name === room.roomName)
             joinRoom(room.roomName);
     });
 });
@@ -37,72 +37,91 @@ socket.on('enterLobby', (data) => {
 socket.on('createRoom', (data) => {
     document.querySelector('.main__room--create').insertAdjacentHTML('beforebegin', generateRoomHTML(data.roomName, 1));
     document.querySelector(`#room_${ data.roomName }`).addEventListener('click', () => { joinRoom(data.roomName) });
-    if(user.name === data.roomName)
+    if(user.name === data.roomName){
         joinRoom(data.roomName);
+    }
 });
 
 socket.on('joinRoom', (data) => {
-    const joinedPlayer = data.joinedPlayer;
-    if(joinedPlayer === user.name){
-        // Initialize room information
-        room.name = data.roomName;
-        room.owner = data.roomStatus.owner;
+    console.log(data);
+    if(data.roomName === room.name){
+        const joinedPlayer = data.joinedPlayer;
         room.playerCount[1] = data.roomStatus.redTeamCount;
         room.playerCount[2] = data.roomStatus.greenTeamCount;
+        room.playerInfo = data.roomStatus.players;
+        if(joinedPlayer === user.name){
+            // Initialize room information
+            room.owner = data.roomStatus.owner;
 
-        // Initialize user information
-        user.team = data.roomStatus.players[user.name].team;
-        user.position = room.playerCount[user.team];
+            // Initialize user information
+            user.team = data.roomStatus.players[user.name].team;
+            user.position = room.playerCount[user.team];
 
-        // Fill information to UI
-        document.querySelector('main__datails--roomname').innerHTML = `${ room.name }'s Room`;
-        if(user.name === room.owner){
-            const startButton = document.querySelector('.datails__button--start');
-            startButton.style.display = 'block';
-            startButton.disabled = true;
+            // Fill information to UI
+            document.querySelector('.main__datails--roomname').innerHTML = `${ room.name }'s Room`;
+            if(user.name === room.owner){
+                const startButton = document.querySelector('.datails__button--start');
+                startButton.style.display = 'block';
+                startButton.disabled = true;
+            }
+            Object.keys(data.roomStatus.players).forEach( playerName => {
+                document.querySelector(`.datails__team${ room.playerInfo[playerName].team }--players`).insertAdjacentHTML('beforeend', generatePlayerHTML(room.playerInfo[playerName].team, playerName));
+            });
+            // document.querySelector(`.datails__team${ user.team }--join`).style.display = 'none';
         }
-        // document.querySelector(`.datails__team${ user.team }--join`).style.display = 'none';
+        else {
+            document.querySelector(`.datails__team${ room.playerInfo[joinedPlayer].team }--players`).insertAdjacentHTML('beforeend', generatePlayerHTML(room.playerInfo[joinedPlayer].team, joinedPlayer));
+            if(user.name === room.owner && room.playerCount[1] === 3 && room.playerCount[2] === 3){
+                const startButton = document.querySelector('.datails__button--start');
+                startButton.disabled = false;
+            }
+        }
     }
-
-    room.playerInfo[joinedPlayer] = data.roomStatus.players[joinedPlayer];
-
-    const joinedPlayerTeam = room.playerInfo[joinedPlayer].team;
-    const joinedPlayerPosition = room.playerCount[joinedPlayerTeam];
-    const joinedPlayerContainer = document.querySelector(`.datails__team${ joinedPlayerTeam }--player${ joinedPlayerPosition }`);
-    joinedPlayerContainer.innerHTML = user.name;
-    joinedPlayerContainer.style.display = 'block';
-    if(user.name === room.owner && room.playerCount[1] === 3 && room.playerCount[2] === 3){
-        const startButton = document.querySelector('.datails__button--start');
-        startButton.disabled = false;
+    else {
+        document.querySelector(`#room_${ data.roomName }`).querySelector('.room__brief--attendance').innerHTML = `( ${ data.roomStatus.redTeamCount + data.roomStatus.greenTeamCount } / 6 )`;
     }
 });
 
 socket.on('leaveRoom', (data) => {
-    const leavedPlayer = data.leavedPlayer;
-    room.playerCount[1] = data.roomStatus.redTeamCount;
-    room.playerCount[2] = data.roomStatus.greenTeamCount;
+    if(data.roomName === room.name){
+        const leavedPlayer = data.leavedPlayer;
+        room.playerCount[1] = data.roomStatus.redTeamCount;
+        room.playerCount[2] = data.roomStatus.greenTeamCount;
 
-    delete room.playerInfo[leavedPlayer];
+        delete room.playerInfo[leavedPlayer];
 
-    const leavedPlayerTeam = room.playerInfo[leavedPlayer].team;
-    const leavedPlayerPosition = room.playerCount[leavedPlayerTeam];
-    const leavedPlayerContainer = document.querySelector(`.datails__team${ leavedPlayerTeam }--player${ leavedPlayerPosition }`);
-    leavedPlayerContainer.innerHTML = '';
-    leavedPlayerContainer.style.display = 'none';
+        const leavedPlayerContainer = document.querySelector(`#user_${ leavedPlayer }`);
+        leavedPlayerContainer.parentNode.removeChild(leavedPlayerContainer);
+        if(leavedPlayer === user.name){
+            const playerContainers = Array.from(document.querySelectorAll('.datails__team--player'));
+            playerContainers.forEach(player => {
+                player.parentNode.removeChild(player);
+            });
+            document.querySelector('.main__details').style.display = 'none';
+        }
+    }
+    else {
+        document.querySelector(`#room_${ data.roomName }`).querySelector('.room__brief--attendance').innerHTML = `( ${ data.roomStatus.redTeamCount + data.roomStatus.greenTeamCount } / 6 )`;
+    }
 });
 
 socket.on('closeRoom', (data) => {
     // if owner !== username, display message panel
-
-    room.name = '';
-    room.owner = '';
-    room.playerCount[1] = 0;
-    room.playerCount[2] = 0;
-    room.playerInfo = {};
-
-    const targetRoom = document.querySelector(`#room_${ room.name }`);
+    const targetRoom = document.querySelector(`#room_${ data.roomName }`);
     targetRoom.parentNode.removeChild(targetRoom);
-    document.querySelector('.main__details').style.display = 'none';
+
+    if(data.roomName === room.name){
+        room.name = '';
+        room.owner = '';
+        room.playerCount[1] = 0;
+        room.playerCount[2] = 0;
+        room.playerInfo = {};
+        const playerContainers = Array.from(document.querySelectorAll('.datails__team--player'));
+        playerContainers.forEach(player => {
+            player.parentNode.removeChild(player);
+        });
+        document.querySelector('.main__details').style.display = 'none';
+    }
 });
 
 socket.on('enterGame', () => {
@@ -114,15 +133,18 @@ function createRoom(){
 }
 
 function joinRoom(roomName){
+    room.name = roomName;
     socket.emit('joinRoom', user.name, roomName);
     document.querySelector('.main__details').style.display = 'block';
 }
 
 function leaveRoom(){
     if(room.owner === user.name){
+        console.log('closeRoom')
         socket.emit('closeRoom', room.name);
     }
     else{
+        console.log('leaveRoom')
         socket.emit('leaveRoom', user.name);
     }
 }
@@ -171,4 +193,8 @@ function generateRoomHTML(name, attendance){
       <p class = "room__brief room__brief--attendance">( ${ attendance } / 6 )</p>
     </button>
     `;
+}
+
+function generatePlayerHTML(team, name){
+    return `<p class = "datails__team--player datails__team${ team }--player" id = "user_${ name }">${ name }</p>`;
 }

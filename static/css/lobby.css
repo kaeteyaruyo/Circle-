@@ -127,7 +127,7 @@
 }
 
 .datails__team--player {
-    display: none;
+    /* display: none; */
     padding: 1rem 0;
     width: 100%;
     border-bottom: .1rem solid;
@@ -156,14 +156,14 @@
     border-color: #F6F7F8;
 } */
 
-.datails__team--join {
+/* .datails__team--join {
     display: block;
     font-weight: bold;
 }
 
 .datails__team--join:hover {
     background: rgba(160, 162, 167, 0.25);
-}
+} */
 
 .main__datails--button {
     grid-area: button;
