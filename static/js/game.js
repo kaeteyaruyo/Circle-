@@ -6,7 +6,7 @@ const socket = io(window.location.origin);
 const stage = createStage(window.innerWidth, window.innerHeight - document.querySelector('.main__scoreboard').offsetHeight, createBullet);
 const shapeLayer = stage.findOne('.shapeLayer');
 
-socket.emit('startGame', "learningRoom");
+socket.emit('startTutorial', "learningRoom");
 
 socket.on('updateTimer', (timer) => {
     stage.updateTimer(`${ timer.min }:${ timer.sec.toString().padStart(2, '0') }`);

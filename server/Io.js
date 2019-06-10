@@ -4,6 +4,7 @@ var Problem_1 = require("./Problem");
 var Timer_1 = require("./Timer");
 var gameRoom = {};
 var roomCount = 0;
+var tutorialRoom = {};
 function createIo(io) {
     io.sockets.on('connection', function (socket) {
         socket.on('createRoom', function (username, roomName) {
@@ -31,12 +32,12 @@ function createIo(io) {
                 });
             }
         });
-        socket.on('closeRoom', function (room) {
-            delete gameRoom[room];
+        socket.on('closeRoom', function (roomName) {
+            delete gameRoom[roomName];
             roomCount = roomCount - 1;
             io.socket.emit('updateRoom', {
                 "operation": "close",
-                "roomName": room,
+                "roomName": roomName,
                 "roomStatus": {}
             });
         });
@@ -111,46 +112,55 @@ function createIo(io) {
         socket.on('userNotReady', function (username, roomName) {
             gameRoom[roomName]["players"][username]["ready"] = false;
         });
-        socket.on('startGame', function (roomName) {
+        socket.on('startTutorial', function (roomName) {
             var timer;
-            if (typeof gameRoom[roomName] !== 'undefined') {
-                if (!gameRoom[roomName]["isTutorial"]) {
-                    if (gameRoom[roomName]["gaming"]) {
-                        timer = gameRoom[roomName]["timer"];
-                    }
-                    else {
-                        timer = Timer_1.createTimer();
-                        gameRoom[roomName]["timer"] = timer;
-                        var timerFun = setInterval(function () {
-                            Timer_1.updateTimer(io, timer, socket);
-                        }, 1000);
-                        var problemFun = setInterval(function () {
-                            Problem_1.updateProblem(gameRoom, roomName);
-                            Problem_1.emitProblem(io, roomName, socket, gameRoom[roomName]["problem"]);
-                        }, 5000);
-                        gameRoom[roomName]["timerFun"] = timerFun;
-                        gameRoom[roomName]["problemFun"] = problemFun;
-                        gameRoom[roomName]["gaming"] = true;
-                    }
-                }
-                else {
-                    timer = gameRoom[roomName]["timer"];
+            if (typeof tutorialRoom[roomName] !== 'undefined') {
+                if (tutorialRoom[roomName]["gaming"]) {
+                    timer = tutorialRoom[roomName]["timer"];
                 }
             }
             else {
                 timer = Timer_1.createTimer();
-                gameRoom[roomName] = {};
-                gameRoom[roomName]["timer"] = timer;
+                tutorialRoom[roomName] = {};
+                tutorialRoom[roomName]["timer"] = timer;
                 var timerFun = setInterval(function () {
                     Timer_1.updateTimer(io, timer, socket);
                 }, 1000);
                 var problemFun = setInterval(function () {
-                    Problem_1.updateProblem(gameRoom, roomName);
-                    Problem_1.emitProblem(io, roomName, socket, gameRoom[roomName]["problem"]);
+                    Problem_1.updateProblem(tutorialRoom, roomName);
+                    Problem_1.emitProblem(io, roomName, socket, tutorialRoom[roomName]["problem"]);
                 }, 5000);
-                gameRoom[roomName]["timerFun"] = timerFun;
-                gameRoom[roomName]["problemFun"] = problemFun;
-                gameRoom[roomName]["isTutorial"] = true;
+                tutorialRoom[roomName]["timerFun"] = timerFun;
+                tutorialRoom[roomName]["problemFun"] = problemFun;
+                socket.isTutorial = true;
+                tutorialRoom[roomName]["gaming"] = true;
+            }
+            socket.room = roomName;
+            socket.join(roomName);
+            Timer_1.updateTimer(io, timer, socket);
+            Problem_1.initProblem(tutorialRoom, roomName);
+            Problem_1.emitProblem(io, roomName, socket, tutorialRoom[roomName]["problem"]);
+        });
+        socket.on('startGame', function (roomName) {
+            var timer;
+            if (typeof gameRoom[roomName] !== 'undefined') {
+                if (gameRoom[roomName]["gaming"]) {
+                    timer = gameRoom[roomName]["timer"];
+                }
+                else {
+                    timer = Timer_1.createTimer();
+                    gameRoom[roomName]["timer"] = timer;
+                    var timerFun = setInterval(function () {
+                        Timer_1.updateTimer(io, timer, socket);
+                    }, 1000);
+                    var problemFun = setInterval(function () {
+                        Problem_1.updateProblem(gameRoom, roomName);
+                        Problem_1.emitProblem(io, roomName, socket, gameRoom[roomName]["problem"]);
+                    }, 5000);
+                    gameRoom[roomName]["timerFun"] = timerFun;
+                    gameRoom[roomName]["problemFun"] = problemFun;
+                    gameRoom[roomName]["gaming"] = true;
+                }
             }
             socket.room = roomName;
             socket.join(roomName);

@@ -1,8 +1,36 @@
 import {updateProblem,emitProblem,initProblem} from './Problem';
-import {updateTimer,createTimer} from './Timer';
+import {updateTimer,createTimer,closeGame} from './Timer';
 
 let gameRoom = {};
 let roomCount = 0;
+let tutorialRoom = {};
+/*
+room info
+gameRoom = {
+    room1 : { // 房間 :JSON
+        players = { // 玩家資訊 :JSON
+            name1 : { // 玩家1 :JSON
+                team : "red", // 所屬隊伍
+                ready : false // 準備好了嗎？
+            },
+            name2 : {
+                ...
+            }
+        },
+        director = "name1", // 房長 :STRING
+        gaming = false, // 是否遊戲中 :BOOLEAN
+        redTeamCount = 1, // 紅隊人數 :INT
+        greenTeamCount = 0, // 綠隊人數 :INT
+        redPoint = 0, // 紅隊分數 :INT
+        greenPoint = 0 // 綠隊分數 :INT
+    },
+    room2 :{
+        ...
+    }
+    ...
+}
+*/
+
 
 function createIo(io){
     io.sockets.on('connection',  (socket) =>{
@@ -20,9 +48,10 @@ function createIo(io){
                 };
                 gameRoom[roomName]["director"] = username;
                 gameRoom[roomName]["gaming"] = false;
-                gameRoom[roomName]["isTutorial"] = false;
                 gameRoom[roomName]["redTeamCount"] = 1;
                 gameRoom[roomName]["greenTeamCount"] = 0;
+                gameRoom[roomName]["redPoint"] = 0;
+                gameRoom[roomName]["greenPoint"] = 0;
                 socket.room = roomName;
                 io.socket.emit('updateRoom',{
                     "operation" : "create",
@@ -41,6 +70,7 @@ function createIo(io){
                 "roomStatus" : {}
             })
         })
+
         socket.on('joinRoom', (username,roomName)=>{
             if(gameRoom[roomName] !== 'undefined'){
                 socket.join(roomName);
@@ -116,49 +146,60 @@ function createIo(io){
         socket.on('userNotReady',(username,roomName)=>{
             gameRoom[roomName]["players"][username]["ready"] = false;
         });
+        socket.on('startTutorial',(roomName)=>{
+            let timer;
+            // toturial
+            if(typeof tutorialRoom[roomName] !== 'undefined'){
+                if(tutorialRoom[roomName]["gaming"]){
+                    timer = tutorialRoom[roomName]["timer"];
+                }
+            }
+            else{
+                timer = createTimer();
+                tutorialRoom[roomName] = {};
+                tutorialRoom[roomName]["timer"] = timer;
+                let timerFun = setInterval(()=>{
+                    let time = updateTimer(io,timer,socket);
+                    closeGame(io,socket,time,tutorialRoom[roomName]);
+                },1000);
+                let problemFun = setInterval(()=>{
+                    updateProblem(tutorialRoom,roomName);
+                    emitProblem(io,roomName,socket,tutorialRoom[roomName]["problem"]);
+                },5000);
+                tutorialRoom[roomName]["timerFun"] = timerFun;
+                tutorialRoom[roomName]["problemFun"] = problemFun;
+                socket.isTutorial = true;
+                tutorialRoom[roomName]["gaming"] = true;
+            }
+            socket.room = roomName;
+            socket.join(roomName);
+            updateTimer(io,timer,socket);
+            initProblem(tutorialRoom,roomName);
+            emitProblem(io,roomName,socket,tutorialRoom[roomName]["problem"]);
+        });
 
         socket.on('startGame',(roomName)=>{
             let timer;
             if(typeof gameRoom[roomName] !== 'undefined'){
                 // for real 6 vs 6
-                if(!gameRoom[roomName]["isTutorial"]){
-                    if(gameRoom[roomName]["gaming"]){
-                        timer = gameRoom[roomName]["timer"];
-                    }
-                    else{
-                        timer = createTimer();
-                        gameRoom[roomName]["timer"] = timer;
-                        let timerFun = setInterval(()=>{
-                            updateTimer(io,timer,socket);
-                        },1000);
-                        let problemFun = setInterval(()=>{
-                            updateProblem(gameRoom,roomName);
-                            emitProblem(io,roomName,socket,gameRoom[roomName]["problem"]);
-                        },5000);
-                        gameRoom[roomName]["timerFun"] = timerFun;
-                        gameRoom[roomName]["problemFun"] = problemFun;
-                        gameRoom[roomName]["gaming"] = true;
-                    }
-                }
-                else{
+                if(gameRoom[roomName]["gaming"]){
                     timer = gameRoom[roomName]["timer"];
                 }
-            }
-            else{
-                // toturial
-                timer = createTimer();
-                gameRoom[roomName] = {};
-                gameRoom[roomName]["timer"] = timer;
-                let timerFun = setInterval(()=>{
-                    updateTimer(io,timer,socket);
-                },1000);
-                let problemFun = setInterval(()=>{
-                    updateProblem(gameRoom,roomName);
-                    emitProblem(io,roomName,socket,gameRoom[roomName]["problem"]);
-                },5000);
-                gameRoom[roomName]["timerFun"] = timerFun;
-                gameRoom[roomName]["problemFun"] = problemFun;
-                gameRoom[roomName]["isTutorial"] = true;
+                else{
+                    timer = createTimer();
+                    gameRoom[roomName]["timer"] = timer;
+                    let timerFun = setInterval(()=>{
+                        let time = updateTimer(io,timer,socket);
+                        closeGame(io,socket,time,gameRoom[roomName]);
+                    },1000);
+                    let problemFun = setInterval(()=>{
+                        updateProblem(gameRoom,roomName);
+                        emitProblem(io,roomName,socket,gameRoom[roomName]["problem"]);
+                    },5000);
+                    gameRoom[roomName]["timerFun"] = timerFun;
+                    gameRoom[roomName]["problemFun"] = problemFun;
+                    gameRoom[roomName]["gaming"] = true;
+                }
             }
             socket.room = roomName;
             socket.join(roomName);
@@ -178,7 +219,21 @@ function createIo(io){
                 gameRoom[roomName]["gaming"] = false;
             }
         });
-
+        
+        socket.on('updatePoint',(roomName,point,team)=>{
+            if(typeof gameRoom[roomName] !== 'undefined'){
+                if(team ==='red'){
+                    gameRoom[roomName]["redPoint"] = point;
+                }
+                else if(team === 'green'){
+                    gameRoom[roomName]["greenPoint"] = point;
+                }
+                io.sockets.emit('updatePoint',gameRoom[roomName]["redPoint"],gameRoom[roomName]["greenPoint"]);
+            }
+            else{
+                socket.emit('error','error cannot find room');
+            }
+        })
     });
 }
 
