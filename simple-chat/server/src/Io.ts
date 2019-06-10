@@ -58,8 +58,8 @@ module.exports = class CircleIO{
                 this.leaveRoom(io,socket,username);
             });
             
-            socket.on('enterlobby',(username)=>{
-                this.enterlobby(io,socket,username);
+            socket.on('enterLobby',()=>{
+                this.enterLobby(io,socket);
             })
 
             socket.on('setUserReady',(username,roomName)=>{
@@ -104,7 +104,7 @@ module.exports = class CircleIO{
                 "team" : 1,
                 "ready" : false
             };
-            this.gameRoom[username]["director"] = username;
+            this.gameRoom[username]["owner"] = username;
             this.gameRoom[username]["gaming"] = false;
             this.gameRoom[username]["redTeamCount"] = 1;
             this.gameRoom[username]["greenTeamCount"] = 0;
@@ -146,9 +146,10 @@ module.exports = class CircleIO{
                 "ready" : false
             };
             io.sockets.emit('joinRoom',{
+                "joinedPlayer": username,
                 "roomName" : roomName,
                 "roomStatus" : thisRoom
-            },joinPerson);
+            });
         }
         else{
             socket.emit('updateRoom',`error when ${username} join ${roomName}`);
@@ -172,9 +173,10 @@ module.exports = class CircleIO{
                 delete players[username];
                 socket.leave(socket.room);
                 io.sockets.emit('leaveRoom',{
+                    "leavedPlayer": username,
                     "roomName" : roomName,
                     "roomStatus" : thisRoom
-                },leavePlayer)
+                })
             }
             else{
                 socket.emit('updateRoom',`error when ${username} leave ${roomName} username not found`);
@@ -182,17 +184,18 @@ module.exports = class CircleIO{
         }
     }
 
-    protected enterlobby(io,socket,username){
+    protected enterLobby(io,socket){
         let rooms = Object.keys(this.gameRoom);
         let players = [];
+        let result = [];
         rooms.forEach(element => {
             let number = Object.keys(this.gameRoom[element]["players"]).length
-            players.push(number);
+            result.push({
+                roomName : element,
+                attendance : number
+            })
         });
-        socket.emit('enterlobby',{
-            rooms : rooms,
-            players : players
-        })
+        socket.emit('enterLobby',result)
     }
 
     protected setUserReady(io,socket,username,roomName){
