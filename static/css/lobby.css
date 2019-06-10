@@ -105,6 +105,7 @@
 .datails__team--teamname {
     padding: 1rem;
     width: 100%;
+    border-bottom: #F6F7F8 .1rem solid;
     text-align: center;
     font-size: 1.75rem;
     font-weight: bold;
@@ -146,11 +147,13 @@
 .datails__team1--player--ready {
     background-color: #F4733D;
     color: #F6F7F8;
+    border-color: #F6F7F8;
 }
 
 .datails__team2--player--ready {
     background-color: #38595E;
     color: #F6F7F8;
+    border-color: #F6F7F8;
 }
 
 
@@ -158,10 +161,6 @@
     display: block;
     font-weight: bold;
 }
-
-/* .datails__team--join--disabled {
-    display: none;
-} */
 
 .datails__team--join:hover {
     background: rgba(160, 162, 167, 0.25);
@@ -184,13 +183,15 @@
     cursor: pointer;
 }
 
-.datails__button:disabled {
-    background: rgba(160, 162, 167, 0.25);
-}
-
 .datails__button:hover {
     background: #38595E;
     color: #F6F7F8;
+}
+
+.datails__button:disabled {
+    background: #38595E;
+    color: #F6F7F8;
+    cursor: default;
 }
 
 .datails__button--cancel {
