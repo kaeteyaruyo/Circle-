@@ -8,7 +8,9 @@ const middleware = require("./server/middleware.js");
 const app = express();
 const server = require('http').Server(app);
 const io = require("socket.io")(server);
-require("./server/Io.js").createIo(io);
+const CircleIO = require("./server/Io.js");
+const circleIo  = new CircleIO();
+circleIo.createIo(io);
 
 // Set static route
 app.use('/css', express.static(path.join(config.projectRoot, '/static/css')));
