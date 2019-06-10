@@ -10,6 +10,8 @@ const server = require('http').Server(app);
 const io = require("socket.io")(server);
 require("./server/Io.js").createIo(io);
 
+const userList = [];
+
 // Set static route
 app.use('/css', express.static(path.join(config.projectRoot, '/static/css')));
 app.use('/js', express.static(path.join(config.projectRoot, '/static/js')));
@@ -47,7 +49,8 @@ app.get('/', middleware.renderSetting, (req, res) => {
 });
 
 app.post('/', (req, res) => {
-    if( req.body.username && !req.session.username ){
+    if( req.body.username && !userList.includes(req.body.username) && !req.session.username ){
+        userList.push(req.body.username);
         req.session.username = req.body.username;
         res.redirect('/lobby');
     }
@@ -66,6 +69,15 @@ app.get('/tutorial', middleware.renderSetting, middleware.checkLogin, (req, res)
     res.render('game', {
         title: 'Tutorial',
         username: req.session.username,
+        mainFile: 'tutorial'
+    });
+});
+
+app.get('/game/:roomName', middleware.renderSetting, middleware.checkLogin, (req, res) => {
+    res.render('game', {
+        title: `${ roomName }'s Room`,
+        username: req.session.username,
+        mainFile: 'game'
     });
 });
 

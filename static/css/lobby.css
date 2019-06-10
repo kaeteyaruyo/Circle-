@@ -144,7 +144,7 @@
     border-color: #38595E;
 }
 
-.datails__team1--player--ready {
+/* .datails__team1--player--ready {
     background-color: #F4733D;
     color: #F6F7F8;
     border-color: #F6F7F8;
@@ -154,8 +154,7 @@
     background-color: #38595E;
     color: #F6F7F8;
     border-color: #F6F7F8;
-}
-
+} */
 
 .datails__team--join {
     display: block;
@@ -198,9 +197,9 @@
     justify-self: left;
 }
 
-.datails__button--ready {
+/* .datails__button--ready {
     justify-self: right;
-}
+} */
 
 .datails__button--start {
     display: none;
