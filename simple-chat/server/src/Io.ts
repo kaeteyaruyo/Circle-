@@ -1,93 +1,239 @@
-import {updateProblem} from './Problem';
-import {updateTimer,createTimer} from './Timer';
+import {updateProblem,emitProblem,initProblem} from './Problem';
+import {updateTimer,createTimer,closeGame} from './Timer';
 
-// usernames which are currently connected to the chat
-let usernames = {};
 let gameRoom = {};
-// rooms which are currently available in chat
-let rooms = ['room1','room2','room3'];
+let roomCount = 0;
+let tutorialRoom = {};
+/*
+room info
+gameRoom = {
+    room1 : { // 房間 :JSON
+        players = { // 玩家資訊 :JSON
+            name1 : { // 玩家1 :JSON
+                team : "red", // 所屬隊伍
+                ready : false // 準備好了嗎？
+            },
+            name2 : {
+                ...
+            }
+        },
+        director = "name1", // 房長 :STRING
+        gaming = false, // 是否遊戲中 :BOOLEAN
+        redTeamCount = 1, // 紅隊人數 :INT
+        greenTeamCount = 0, // 綠隊人數 :INT
+        redPoint = 0, // 紅隊分數 :INT
+        greenPoint = 0 // 綠隊分數 :INT
+    },
+    room2 :{
+        ...
+    }
+    ...
+}
+*/
+
 
 function createIo(io){
     io.sockets.on('connection',  (socket) =>{
-
-        // when the client emits 'adduser', this listens and executes
-        socket.on('adduser', (username)=>{
-            // store the username in the socket session for this client
-            socket.username = username;
-            // store the room name in the socket session for this client
-            socket.room = 'room1';
-            // add the client's username to the global list
-            usernames[username] = username;
-            // send client to room 1
-            socket.join('room1');
-            // echo to client they've connected
-            socket.emit('updatechat', 'SERVER', 'you have connected to room1');
-            // echo to room 1 that a person has connected to their room
-            socket.broadcast.to('room1').emit('updatechat', 'SERVER', username + ' has connected to this room');
-            socket.emit('updaterooms', rooms, 'room1');
-        });
-    
-        // when the client emits 'sendchat', this listens and executes
-        socket.on('sendchat',  (data)=> {
-            // we tell the client to execute 'updatechat' with 2 parameters
-            io.sockets.in(socket.room).emit('updatechat', socket.username, data);
-        });
-    
-        socket.on('switchRoom', (newroom)=>{
-            // leave the current room (stored in session)
-            socket.leave(socket.room);
-            // join new room, received as function parameter
-            socket.join(newroom);
-            socket.emit('updatechat', 'SERVER', 'you have connected to '+ newroom);
-            // sent message to OLD room
-            socket.broadcast.to(socket.room).emit('updatechat', 'SERVER', socket.username+' has left this room');
-            // update socket session room title
-            socket.room = newroom;
-            socket.broadcast.to(newroom).emit('updatechat', 'SERVER', socket.username+' has joined this room');
-            socket.emit('updaterooms', rooms, newroom);
-        });
-    
-        // when the user disconnects.. perform this
-        socket.on('disconnect', ()=>{
-            // remove the username from global usernames list
-            delete usernames[socket.username];
-            // update list of users in chat, client-side
-            io.sockets.emit('updateusers', usernames);
-            // echo globally that this client has left
-            socket.broadcast.emit('updatechat', 'SERVER', socket.username + ' has disconnected');
-            socket.leave(socket.room);
-        });
-        socket.on('startGame',(room)=>{
-            if(typeof gameRoom[room] !== 'undefined'){
-                socket.room = room;
-                socket.join(room);
+        socket.on('createRoom',(username,roomName)=>{
+            if(typeof gameRoom[roomName] !== 'undefined'){
+                socket.emit('updateRoom',"error roomName conflict");
             }
             else{
-                let timer = createTimer();
-                gameRoom[room] = {};
-                gameRoom[room]["timer"] = timer;
+                roomCount = roomCount + 1;
+                gameRoom[roomName] = {};
+                gameRoom[roomName]["players"] = {};
+                gameRoom[roomName]["players"][username] = {
+                    "team" : "red",
+                    "ready" : false
+                };
+                gameRoom[roomName]["director"] = username;
+                gameRoom[roomName]["gaming"] = false;
+                gameRoom[roomName]["redTeamCount"] = 1;
+                gameRoom[roomName]["greenTeamCount"] = 0;
+                gameRoom[roomName]["redPoint"] = 0;
+                gameRoom[roomName]["greenPoint"] = 0;
+                socket.room = roomName;
+                io.socket.emit('updateRoom',{
+                    "operation" : "create",
+                    "roomName" : roomName,
+                    "roomStatus" : gameRoom[roomName]
+                });
+            }
+        })
+
+        socket.on('closeRoom',(roomName)=>{
+            delete gameRoom[roomName];
+            roomCount = roomCount - 1;
+            io.socket.emit('updateRoom',{
+                "operation" : "close",
+                "roomName" : roomName,
+                "roomStatus" : {}
+            })
+        })
+
+        socket.on('joinRoom', (username,roomName)=>{
+            if(gameRoom[roomName] !== 'undefined'){
+                socket.join(roomName);
+                let team;
+                if(gameRoom[roomName]["redTeamCount"] > gameRoom[roomName]["greenTeamCount"]){
+                    team = "red";
+                    gameRoom[roomName]["redTeamCount"] = gameRoom[roomName]["redTeamCount"] + 1;
+                }
+                else{
+                    team = "green";
+                    gameRoom[roomName]["greenTeamCount"] = gameRoom[roomName]["greenTeamCount"] + 1;
+                }
+                gameRoom[roomName]["players"][username] = {
+                    "team" : team,
+                    "ready" : false
+                };
+                io.socket.emit('updateRoom',{
+                    "operation" : "update",
+                    "roomName" : roomName,
+                    "roomStatus" : gameRoom[roomName]
+                });
+            }
+            else{
+                socket.emit('updateRoom',`error when ${username} join ${roomName}`);
+            }
+        });
+    
+        socket.on('leaveRoom', (username)=>{
+            let roomName = socket.room;
+            // open room person leave room
+            if(gameRoom[roomName] !== 'undefined'){
+                if (username === gameRoom[roomName]["director"]){
+                    delete gameRoom[roomName];
+                    roomCount = roomCount - 1;
+                    io.socket.emit('updateRoom',{
+                        "operation" : "close",
+                        "roomName" : roomName,
+                        "roomStatus" : {}
+                    })
+                }
+                else{
+                    let room = gameRoom[roomName];
+                    let players = room["players"];
+                    if(players[username] !== 'undefined'){
+                        if(players[username]["team"] === "red"){
+                            gameRoom[roomName]["redTeamCount"] = gameRoom[roomName]["redTeamCount"] - 1;
+                        }
+                        else{
+                            gameRoom[roomName]["greenTeamCount"] = gameRoom[roomName]["greenTeamCount"] - 1;
+                        }
+                        delete players[username];
+                        socket.leave(socket.room);
+                        io.socket.emit('updateRoom',{
+                            "operation" : "update",
+                            "roomName" : roomName,
+                            "roomStatus" : gameRoom[roomName]
+                        })
+                    }
+                    else{
+                        socket.emit('updateRoom',`error when ${username} leave ${roomName} username not found`);
+                    }
+                }
+            }
+            else{
+                socket.emit('updateRoom',`error when ${username} leave ${roomName} room name not found`);
+            }
+        });
+        
+        socket.on('userReady',(username,roomName)=>{
+            gameRoom[roomName]["players"][username]["ready"] = true;
+        });
+
+        socket.on('userNotReady',(username,roomName)=>{
+            gameRoom[roomName]["players"][username]["ready"] = false;
+        });
+        socket.on('startTutorial',(roomName)=>{
+            let timer;
+            // toturial
+            if(typeof tutorialRoom[roomName] !== 'undefined'){
+                if(tutorialRoom[roomName]["gaming"]){
+                    timer = tutorialRoom[roomName]["timer"];
+                }
+            }
+            else{
+                timer = createTimer();
+                tutorialRoom[roomName] = {};
+                tutorialRoom[roomName]["timer"] = timer;
                 let timerFun = setInterval(()=>{
-                    updateTimer(io,timer,socket);
+                    let time = updateTimer(io,timer,socket);
+                    closeGame(io,socket,time,tutorialRoom[roomName]);
                 },1000);
                 let problemFun = setInterval(()=>{
-                    updateProblem(io,room,socket);
+                    updateProblem(tutorialRoom,roomName);
+                    emitProblem(io,roomName,socket,tutorialRoom[roomName]["problem"]);
                 },5000);
-                gameRoom[room]["timerFun"] = timerFun;
-                gameRoom[room]["problemFun"] = problemFun;
-                socket.room = room;
-                socket.join(room);
+                tutorialRoom[roomName]["timerFun"] = timerFun;
+                tutorialRoom[roomName]["problemFun"] = problemFun;
+                socket.isTutorial = true;
+                tutorialRoom[roomName]["gaming"] = true;
             }
+            socket.room = roomName;
+            socket.join(roomName);
+            updateTimer(io,timer,socket);
+            initProblem(tutorialRoom,roomName);
+            emitProblem(io,roomName,socket,tutorialRoom[roomName]["problem"]);
         });
-        socket.on('closeGame',(room)=>{
-            if(typeof gameRoom[room] !== 'undefined'){
+
+        socket.on('startGame',(roomName)=>{
+            let timer;
+            if(typeof gameRoom[roomName] !== 'undefined'){
+                // for real 6 vs 6
+                if(gameRoom[roomName]["gaming"]){
+                    timer = gameRoom[roomName]["timer"];
+                }
+                else{
+                    timer = createTimer();
+                    gameRoom[roomName]["timer"] = timer;
+                    let timerFun = setInterval(()=>{
+                        let time = updateTimer(io,timer,socket);
+                        closeGame(io,socket,time,gameRoom[roomName]);
+                    },1000);
+                    let problemFun = setInterval(()=>{
+                        updateProblem(gameRoom,roomName);
+                        emitProblem(io,roomName,socket,gameRoom[roomName]["problem"]);
+                    },5000);
+                    gameRoom[roomName]["timerFun"] = timerFun;
+                    gameRoom[roomName]["problemFun"] = problemFun;
+                    gameRoom[roomName]["gaming"] = true;
+                }
+            }
+            socket.room = roomName;
+            socket.join(roomName);
+            updateTimer(io,timer,socket);
+            initProblem(gameRoom,roomName);
+            emitProblem(io,roomName,socket,gameRoom[roomName]["problem"]);
+        });
+
+        socket.on('closeGame',(roomName)=>{
+            if(typeof gameRoom[roomName] !== 'undefined'){
                 socket.room = "";
-                socket.leave(room);
-                let timerFun = gameRoom[room]["timerFun"];
-                let problemFun = gameRoom[room]["problemFun"];
+                socket.leave(roomName);
+                let timerFun = gameRoom[roomName]["timerFun"];
+                let problemFun = gameRoom[roomName]["problemFun"];
                 clearInterval(timerFun);
                 clearInterval(problemFun);
+                gameRoom[roomName]["gaming"] = false;
             }
         });
+        
+        socket.on('updatePoint',(roomName,point,team)=>{
+            if(typeof gameRoom[roomName] !== 'undefined'){
+                if(team ==='red'){
+                    gameRoom[roomName]["redPoint"] = point;
+                }
+                else if(team === 'green'){
+                    gameRoom[roomName]["greenPoint"] = point;
+                }
+                io.sockets.emit('updatePoint',gameRoom[roomName]["redPoint"],gameRoom[roomName]["greenPoint"]);
+            }
+            else{
+                socket.emit('error','error cannot find room');
+            }
+        })
     });
 }
 
