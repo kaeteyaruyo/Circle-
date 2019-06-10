@@ -26,7 +26,7 @@ document.querySelector('.datails__button--start').addEventListener('click', () =
 socket.emit('enterLobby');
 
 socket.on('enterLobby', (data) => {
-    data.list.forEach(room => {
+    data.rooms.forEach(room => {
         document.querySelector('.main__room--create').insertAdjacentHTML('beforebegin', generateRoomHTML(room.roomName, room.attendance));
         document.querySelector(`#room_${ room.roomName }`).addEventListener('click', () => { joinRoom(room.roomName) });
         if(username === room.roomName)
@@ -37,11 +37,12 @@ socket.on('enterLobby', (data) => {
 socket.on('createRoom', (data) => {
     document.querySelector('.main__room--create').insertAdjacentHTML('beforebegin', generateRoomHTML(data.roomName, 1));
     document.querySelector(`#room_${ data.roomName }`).addEventListener('click', () => { joinRoom(data.roomName) });
-    if(username === data.roomName)
+    if(user.name === data.roomName)
         joinRoom(data.roomName);
 });
 
-socket.on('joinRoom', (data, joinedPlayer) => {
+socket.on('joinRoom', (data) => {
+    const joinedPlayer = data.joinedPlayer;
     if(joinedPlayer === user.name){
         // Initialize room information
         room.name = data.roomName;
@@ -76,7 +77,8 @@ socket.on('joinRoom', (data, joinedPlayer) => {
     }
 });
 
-socket.on('leaveRoom', (data, leavedPlayer) => {
+socket.on('leaveRoom', (data) => {
+    const leavedPlayer = data.leavedPlayer;
     room.playerCount[1] = data.roomStatus.redTeamCount;
     room.playerCount[2] = data.roomStatus.greenTeamCount;
 
