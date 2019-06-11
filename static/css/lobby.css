@@ -21,10 +21,13 @@
     border: #38595E 2px solid;
     border-radius: 5px;
     background:  #2CC0B3;
+    cursor: pointer;
 }
 
-.main__room {
-    cursor: pointer;
+.main__room:disabled {
+    cursor: default;
+    border: #913108 2px solid;
+    background: #F4733D;
 }
 
 .room__brief {
@@ -127,7 +130,6 @@
 }
 
 .datails__team--player {
-    /* display: none; */
     padding: 1rem 0;
     width: 100%;
     border-bottom: .1rem solid;

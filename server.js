@@ -35,7 +35,7 @@ app.use( session( {
     cookie:            {
         // domain:   config.host,
         httpOnly: true,
-        maxAge: 10 * 60 * 1000, // 10 minutes
+        maxAge: 300 * 60 * 1000, // 300 minutes
     },
 } ) );
 
