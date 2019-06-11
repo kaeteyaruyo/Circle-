@@ -5,8 +5,9 @@ import { passGlobalVariableToBullet, createBullet } from '/js/game/bullet.js'
 const socket = io(window.location.origin);
 const stage = createStage(window.innerWidth, window.innerHeight - document.querySelector('.main__scoreboard').offsetHeight, createBullet);
 const shapeLayer = stage.findOne('.shapeLayer');
+const username = /Hi, ([\S]+)!/.exec(document.querySelector('.header__username').innerHTML)[1];
 
-socket.emit('startGame', "learningRoom");
+socket.emit('startTutorial', username);
 
 socket.on('updateTimer', (timer) => {
     stage.updateTimer(`${ timer.min }:${ timer.sec.toString().padStart(2, '0') }`);

@@ -10,9 +10,17 @@ function updateTimer(io, Timer, socket) {
         min: min,
         sec: sec
     });
+    return passTime;
 }
 exports.updateTimer = updateTimer;
 function createTimer() {
     return new Date();
 }
 exports.createTimer = createTimer;
+function closeGame(io, socket, time, roomInfo) {
+    if (time <= 0) {
+        var summary = roomInfo;
+        io.sockets["in"](socket.room).emit('GameOver', summary);
+    }
+}
+exports.closeGame = closeGame;
