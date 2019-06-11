@@ -66,6 +66,7 @@ app.get('/tutorial', middleware.renderSetting, middleware.checkLogin, (req, res)
     res.render('game', {
         title: 'Tutorial',
         username: req.session.username,
+        mainFile: 'tutorial',
     });
 });
 

@@ -27,7 +27,7 @@ function createBullet({ index, team }){
     bullet.startY = bullet.y();
 
     if(randomInt(10) > 0){
-        const items = randomInt(5);
+        const items = randomInt(4);
         if(items === 0)
             bullet.items = 'shuffle';
         if(items === 1)
@@ -36,9 +36,7 @@ function createBullet({ index, team }){
             bullet.items = 'exchange';
         if(items === 3)
             bullet.items = 'magicBall';
-        if(items === 4)
-            bullet.items = 'changeQuiz';
-        bullet.number = null;
+        bullet.number = 0;
     }
     else{
         bullet.number = randomInt(10);
@@ -52,19 +50,7 @@ function createBullet({ index, team }){
         strokeWidth: 1,
     }));
 
-
-    if(bullet.number !== null){
-        const text = new Konva.Text({
-            fontSize: 40,
-            fontFamily: 'Work Sans',
-            text: bullet.number.toString(),
-            fill: textColor[team],
-        });
-        text.offsetX(text.width() / 2);
-        text.offsetY(text.height() / 2);
-        bullet.add(text);
-    }
-    else{
+    if(bullet.items !== null){
         // Original svg size is 512 x 512
         const path = new Konva.Path({
             x: -16,
@@ -87,10 +73,18 @@ function createBullet({ index, team }){
         if(bullet.items === 'magicBall'){
             path.data('M224 96l16-32 32-16-32-16-16-32-16 32-32 16 32 16 16 32zM80 160l26.66-53.33L160 80l-53.34-26.67L80 0 53.34 53.33 0 80l53.34 26.67L80 160zm352 128l-26.66 53.33L352 368l53.34 26.67L432 448l26.66-53.33L512 368l-53.34-26.67L432 288zm70.62-193.77L417.77 9.38C411.53 3.12 403.34 0 395.15 0c-8.19 0-16.38 3.12-22.63 9.38L9.38 372.52c-12.5 12.5-12.5 32.76 0 45.25l84.85 84.85c6.25 6.25 14.44 9.37 22.62 9.37 8.19 0 16.38-3.12 22.63-9.37l363.14-363.15c12.5-12.48 12.5-32.75 0-45.24zM359.45 203.46l-50.91-50.91 86.6-86.6 50.91 50.91-86.6 86.6z');
         }
-        if(bullet.items === 'changeQuiz'){
-            path.data('M370.72 133.28C339.458 104.008 298.888 87.962 255.848 88c-77.458.068-144.328 53.178-162.791 126.85-1.344 5.363-6.122 9.15-11.651 9.15H24.103c-7.498 0-13.194-6.807-11.807-14.176C33.933 94.924 134.813 8 256 8c66.448 0 126.791 26.136 171.315 68.685L463.03 40.97C478.149 25.851 504 36.559 504 57.941V192c0 13.255-10.745 24-24 24H345.941c-21.382 0-32.09-25.851-16.971-40.971l41.75-41.749zM32 296h134.059c21.382 0 32.09 25.851 16.971 40.971l-41.75 41.75c31.262 29.273 71.835 45.319 114.876 45.28 77.418-.07 144.315-53.144 162.787-126.849 1.344-5.363 6.122-9.15 11.651-9.15h57.304c7.498 0 13.194 6.807 11.807 14.176C478.067 417.076 377.187 504 256 504c-66.448 0-126.791-26.136-171.315-68.685L48.97 471.03C33.851 486.149 8 475.441 8 454.059V320c0-13.255 10.745-24 24-24z');
-        }
         bullet.add(path)
+    }
+    else{
+        const text = new Konva.Text({
+            fontSize: 40,
+            fontFamily: 'Work Sans',
+            text: bullet.number.toString(),
+            fill: textColor[team],
+        });
+        text.offsetX(text.width() / 2);
+        text.offsetY(text.height() / 2);
+        bullet.add(text);
     }
 
     // Add member function
