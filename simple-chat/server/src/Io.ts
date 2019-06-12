@@ -40,7 +40,6 @@ module.exports = class CircleIO{
     constructor(){
         this.gameRoom = {};
         this.roomCount = 0;
-        this.tutorialRoom = {};
     }
     public createIo(io){
         io.sockets.on('connection',  (socket) =>{
@@ -269,7 +268,6 @@ module.exports = class CircleIO{
     }
 
     protected startGame(io,socket,username,roomName){
-        console.log('startGame',username);
         if(roomName === undefined) socket.emit("startGame","you are not in any room");
         else{
             if(this.gameRoom[roomName]["isTutorial"]){
@@ -285,12 +283,6 @@ module.exports = class CircleIO{
                 let num_flat = flatten(num);
                 let team = this.gameRoom[roomName]["boardTeam"];
                 let team_flat = flatten(team);
-                console.log(objectToArray({
-                    "index" : getAllIndex(),
-                    "number" : num_flat,
-                    "team" : team_flat,
-                }))
-                console.log(roomName)
                 this.updateCell(io,socket,roomName,objectToArray({
                     "index" : getAllIndex(),
                     "number" : num_flat,
@@ -312,12 +304,6 @@ module.exports = class CircleIO{
                     let num_flat = flatten(num);
                     let team = this.gameRoom[roomName]["boardTeam"];
                     let team_flat = flatten(team);
-                    console.log(objectToArray({
-                        "index" : getAllIndex(),
-                        "number" : num_flat,
-                        "team" : team_flat,
-                    }))
-                    console.log(roomName)
                     this.updateCell(io,socket,roomName,objectToArray({
                         "index" : getAllIndex(),
                         "number" : num_flat,
@@ -347,11 +333,15 @@ module.exports = class CircleIO{
         let boardNumber = getRandomBoardNumber();
         this.gameRoom[roomName]["boardNumber"] = boardNumber;
         let index = getAllIndex();
+        let num  = this.gameRoom[roomName]["boardNumber"];
+        let num_flat = flatten(num);
+        let team = this.gameRoom[roomName]["boardTeam"];
+        let team_flat = flatten(team);
         io.sockets.emit('updateCell',objectToArray({
             "roomName" : roomName,
             "index" : index,
-            "number" : this.gameRoom[roomName]["boardNumber"],
-            "team" : this.gameRoom[roomName]["boardTeam"], // score of my team
+            "number" : num_flat,
+            "team" : team_flat, // score of my team
         }));
     }
 
@@ -382,12 +372,10 @@ module.exports = class CircleIO{
         let username = data["username"];
         let index = data["index"];
         let value = [];
-        console.log(this.gameRoom[roomName]["players"][username]["bullets"]);
         index.forEach(element => {
            let temp = updateBullet(this.gameRoom[roomName]["players"][username]["bullets"],element); 
            value.push(temp);
         });
-        console.log(this.gameRoom[roomName]["players"][username]["bullets"]);
         socket.emit('updateBullet',objectToArray({
             "index" : index,
             "bullet" : value
