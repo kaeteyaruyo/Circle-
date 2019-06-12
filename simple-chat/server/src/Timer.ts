@@ -1,7 +1,7 @@
 function updateTimer(io,Timer,socket){
     let now = new Date().getTime();
     let start = Timer.getTime();
-    let passTime = 300 - Math.floor((now - start)/1000);
+    let passTime = 180 - Math.floor((now - start)/1000);
     let min = Math.floor(passTime / 60)
     let sec = Math.floor(passTime % 60)
     io.sockets.in(socket.room).emit('updateTimer', { 
@@ -14,10 +14,19 @@ function updateTimer(io,Timer,socket){
 function createTimer(){
     return new Date();
 }
-function closeGame(io,socket,time,roomInfo){
+function closeGame(io,socket,time,gameRoom,roomName){
     if(time <= 0){
-        let summary = roomInfo;
-        io.sockets.in(socket.room).emit('GameOver', summary);
+        let summary = gameRoom[roomName];
+        io.sockets.in(socket.room).emit('GameOver');
+        if(this.gameRoom[roomName] !== undefined){
+            socket.room = "";
+            socket.leave(roomName);
+            let timerFun = this.gameRoom[roomName]["timerFun"];
+            let problemFun = this.gameRoom[roomName]["problemFun"];
+            clearInterval(timerFun);
+            clearInterval(problemFun);
+            this.gameRoom[roomName]["gaming"] = false;   
+        }
     }
 }
 

@@ -1,5 +1,5 @@
 import *  as fs from 'fs';
-import {getRangeRandom , getRandomProblem } from './Ramdom';
+import {getRangeRandom , getRandomProblem } from './Random';
 import * as path from 'path';
 
 const problems = {
@@ -13,7 +13,9 @@ function updateProblem(gameRoom,roomName){
     gameRoom[roomName]["problem"] = problem;
 }
 function emitProblem(io,room,socket,problem){
-    io.sockets.in(socket.room).emit('updateProblem', { problem:problem});
+    io.sockets.in(socket.room).emit('updateQuiz', { 
+        "quiz" : problem,
+    });
 }
 function initProblem(gameRoom,roomName){
     if(typeof gameRoom[roomName]["problem"] === 'undefined'){
