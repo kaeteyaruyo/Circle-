@@ -6,6 +6,7 @@ const user = {
 
 const room = {
     owner: '',
+    start: false,
     playerCount: [ , 0, 0], // for team 1 and team 2
     playerInfo: {},
 }
@@ -167,6 +168,7 @@ socket.on('closeRoom', (data) => {
 socket.on('enterGame', (data) => {
     // When some room start gaming
     if(isInRoom(data.roomName)){
+        room.start = true;
         // If I am in the room, redirect to route `/game`
         window.location.href = `/game/${ data.roomName }`;
     }
@@ -256,7 +258,7 @@ function isInRoom(roomName){
 }
 
 window.addEventListener('beforeunload', () => {
-    if(room.owner !== ''){
+    if(room.owner !== '' && !room.start){
         leaveRoom();
     }
 });
