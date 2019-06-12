@@ -18,7 +18,7 @@ document.querySelector('.main__room--create').addEventListener('click', createRo
 // document.querySelector('.datails__button--ready').addEventListener('click', getReady);
 document.querySelector('.datails__button--cancel').addEventListener('click', leaveRoom);
 document.querySelector('.datails__button--start').addEventListener('click', () => {
-    socket.emit('enterGame', room.onwer);
+    socket.emit('enterGame', room.owner);
 });
 
 socket.emit('enterLobby');
@@ -84,7 +84,7 @@ socket.on('joinRoom', (data) => {
             document.querySelector(`.datails__team${ room.playerInfo[joinedPlayerName].team }--players`)
                 .insertAdjacentHTML('beforeend', generatePlayerHTML(room.playerInfo[joinedPlayerName].team, joinedPlayerName));
             // If I am the room owner, check number of player to decied whether to start game
-            if(isOwner(room.owner) && room.playerCount[1] === 3 && room.playerCount[2] === 3){
+            if(isOwner(room.owner) && room.playerCount[1] === 1 && room.playerCount[2] === 1){
                 document.querySelector('.datails__button--start').disabled = false;
             }
         }
@@ -96,7 +96,7 @@ socket.on('joinRoom', (data) => {
         room.querySelector('.room__brief--attendance')
             .innerHTML = `( ${ attendance } / 6 )`;
         // If room has been full, don't let anyone in
-        if(attendance === 6)
+        if(attendance === 2)
             room.disabled = true;
     }
 });
@@ -162,7 +162,7 @@ socket.on('closeRoom', (data) => {
     }
 });
 
-socket.on('enterGame', () => {
+socket.on('enterGame', (data) => {
     // When some room start gaming
     if(isInRoom(data.roomName)){
         // If I am in the room, redirect to route `/game`
@@ -177,7 +177,7 @@ socket.on('enterGame', () => {
 })
 
 function createRoom(){
-    socket.emit('createRoom', user.name);
+    socket.emit('createRoom', user.name,false);
 }
 
 function joinRoom(roomName){

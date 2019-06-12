@@ -7,7 +7,7 @@ const stage = createStage(window.innerWidth, window.innerHeight - document.query
 const shapeLayer = stage.findOne('.shapeLayer');
 const username = /Hi, ([\S]+)!/.exec(document.querySelector('.header__username').innerHTML)[1];
 const roomname = /\/game\/([\S]+)/.exec(window.location.pathname)[1];
-const team = 0;
+let team = 0;
 
 passGlobalVariableToCell({
     user_name: username,
