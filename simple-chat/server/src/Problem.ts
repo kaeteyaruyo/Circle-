@@ -6,7 +6,6 @@ const problems = {
     "keys": ["basic", "function", "special"],
     "basic": ["<", "==", ">", "%"],
     "function": ["isSquare(x)", "isPrime(x)", "inFibonacci(x)", "isPower2(x)"],
-    "special": ["x-2x+1", "x+2x+1"]
 };
 function updateProblem(gameRoom,roomName){
     let problem = getRandomProblem(problems);
