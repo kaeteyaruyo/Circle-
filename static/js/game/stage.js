@@ -56,7 +56,7 @@ function createStage(width, height, createBullet){
         const shape = shapeLayer.getIntersection(stage.getPointerPosition());
         if (previousShape && shape) {
             if (previousShape !== shape) {
-                // // leave from old targer
+                // // leave from old target
                 // previousShape.fire(
                 //     'dragleave',
                 //     {
@@ -124,28 +124,51 @@ function createStage(width, height, createBullet){
         const cell = droppedShape ? droppedShape.getParent() : null;
         const bullet = e.target;
 
-        if(cell && cell.name().includes('cell') && cell.owner == 0){
-            previousShape.fire(
-                'drop',
-                {
-                    type: 'drop',
-                    target: previousShape,
-                    evt: e.evt
-                },
-                true
-            );
+        if(cell && cell.name() === 'cell'){
+            // previousShape.fire(
+            //     'drop',
+            //     {
+            //         type: 'drop',
+            //         target: previousShape,
+            //         evt: e.evt
+            //     },
+            //     true
+            // );
 
-            // Add number to cell
-            cell.addNumber(bullet.number, bullet.team);
-
-            // Spawn a new bullet and destroy used one
-            shapeLayer.add(createBullet({
-                index: bullet.bulletIndex,
-                team: bullet.team,
-                originX: magazine.x(),
-                originY: magazine.y(),
-            }));
-            bullet.destroy();
+            if(bullet.number === 13){
+                // Only magic ball could ignore cell's owner
+                cell.collision(bullet.number, bullet.team);
+                socket.emit('updateBullet', roomname, {
+                    username,
+                    index: bullet.bulletIndex,
+                });
+                bullet.destroy();
+            }
+            else {
+                if(cell.owner !== 0){
+                    if(bullet.number == 10){
+                        // if it was a shuffle
+                        socket.emit('shuffleBoard', roomname);
+                    }
+                    else if(bullet.number == 12){
+                        // if it was an exchange
+                        const victims = [];
+                        console.log(shapeLayer.find('.cell'));
+                    }
+                    else{
+                        cell.collision(bullet.number, bullet.team);
+                    }
+                    socket.emit('updateBullet', roomname, {
+                        username,
+                        index: bullet.bulletIndex,
+                    });
+                    bullet.destroy();
+                }
+                else{
+                    bullet.moveTo(shapeLayer);
+                    bullet.reset();
+                }
+            }
         }
         else {
             bullet.moveTo(shapeLayer);
@@ -193,8 +216,12 @@ function createStage(width, height, createBullet){
 
     stage.updateQuiz = (quiz) => {
         document.querySelector('.main__scoreboard--quiz').innerHTML = quiz;
-        // check when timer equals to 0:00
     }
+
+    stage.updateScore = (score) => {
+        document.querySelector('.main__scoreboard--score').innerHTML = score.toString();
+    }
+
     return stage;
 }
 

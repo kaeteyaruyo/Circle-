@@ -67,6 +67,29 @@
     grid-area: canvas;
 }
 
+.main__timesup {
+    z-index: 1;
+    display: none;
+    width: 100vw;
+    height: 100vh;
+    padding-top: 40vh;
+    position: fixed;
+    left: 0;
+    top: 0;
+    overflow: auto;
+    background: transparent;
+}
+
+.main__timesup--container {
+    width: 90vw;
+    margin: 0 auto;
+    padding: 1rem;
+    background: #F6F7F8;
+    border: #38595E 3px inset;
+    font-size: 3rem;
+    font-weight: bolder;
+}
+
 @media only screen and (max-width: 600px) {
     .main__scoreboard {
         max-height: 26vh;

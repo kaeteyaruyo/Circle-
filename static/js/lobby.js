@@ -18,7 +18,7 @@ document.querySelector('.main__room--create').addEventListener('click', createRo
 // document.querySelector('.datails__button--ready').addEventListener('click', getReady);
 document.querySelector('.datails__button--cancel').addEventListener('click', leaveRoom);
 document.querySelector('.datails__button--start').addEventListener('click', () => {
-    socket.emit('enterGame');
+    socket.emit('enterGame', room.onwer);
 });
 
 socket.emit('enterLobby');
