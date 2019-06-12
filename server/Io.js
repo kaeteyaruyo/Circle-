@@ -55,6 +55,9 @@ module.exports = (function () {
             socket.on('updateBullet', function (roomName, data) {
                 _this.updateBullet(io, socket, roomName, data);
             });
+            socket.on('getBullet', function (roomName, username) {
+                _this.getBullet(io, socket, roomName, username);
+            });
         });
     };
     CircleIO.prototype.createRoom = function (io, socket, username, isTutorial) {
@@ -280,7 +283,7 @@ module.exports = (function () {
             "team": team_flat
         });
         for (var i = 0; i < arr.length; i++) {
-            arr["roomName"] = roomName;
+            arr[i].roomName = roomName;
         }
         io.sockets.emit('updateCell', arr);
     };
@@ -318,6 +321,12 @@ module.exports = (function () {
         socket.emit('updateBullet', Tool_1.objectToArray({
             "index": index,
             "bullet": value
+        }));
+    };
+    CircleIO.prototype.getBullet = function (io, socket, roomName, username) {
+        socket.emit('updateBullet', Tool_1.objectToArray({
+            "index": [0, 1, 2, 3, 4],
+            "bullet": this.gameRoom[roomName]["players"][username]["bullets"]
         }));
     };
     return CircleIO;

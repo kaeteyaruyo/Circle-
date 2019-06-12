@@ -99,6 +99,10 @@ module.exports = class CircleIO{
 
             socket.on('updateBullet',(roomName,data)=>{
                 this.updateBullet(io,socket,roomName,data);
+            });
+
+            socket.on('getBullet',(roomName,username)=>{
+                this.getBullet(io,socket,roomName,username);
             })
         });
     }
@@ -343,7 +347,7 @@ module.exports = class CircleIO{
             "team" : team_flat, // score of my team
         });
         for(let i=0;i<arr.length;i++){
-            arr["roomName"] = roomName;
+            arr[i].roomName= roomName;
         }
         io.sockets.emit('updateCell',arr);
     }
@@ -382,6 +386,13 @@ module.exports = class CircleIO{
         socket.emit('updateBullet',objectToArray({
             "index" : index,
             "bullet" : value
+        }));
+    }
+
+    protected getBullet(io,socket,roomName,username){
+        socket.emit('updateBullet',objectToArray({
+            "index" : [0,1,2,3,4],
+            "bullet" : this.gameRoom[roomName]["players"][username]["bullets"]
         }));
     }
 }
