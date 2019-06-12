@@ -1,10 +1,10 @@
-function updateTimer(io,Timer,socket){
+function updateTimer(io,Timer,socket,roomName){
     let now = new Date().getTime();
     let start = Timer.getTime();
     let passTime = 180 - Math.floor((now - start)/1000);
     let min = Math.floor(passTime / 60)
     let sec = Math.floor(passTime % 60)
-    io.sockets.in(socket.room).emit('updateTimer', { 
+    io.sockets.in(roomName).emit('updateTimer', { 
         min: min,
         sec: sec,
     });

@@ -231,7 +231,10 @@ module.exports = class CircleIO{
     }
 
     protected enterGame(io,socket,roomName){
-        io.sockets.in(roomName).emit('enterGame');
+        console.log("enterGame");
+        io.sockets.in(roomName).emit('enterGame',{
+            "roomName" : roomName
+        });
     }
 
     protected initGame(io,socket,roomName){
@@ -247,10 +250,10 @@ module.exports = class CircleIO{
                 this.gameRoom[roomName]["boardNumber"] = getRandomBoardNumber();
                 this.gameRoom[roomName]["boardTeam"] = initBoardTeam();
                 Object.keys(this.gameRoom[roomName]["players"]).forEach(player=>{
-                    this.gameRoom[roomName][player]["bullets"] = initBullet();
+                    this.gameRoom[roomName]["players"][player]["bullets"] = initBullet();
                 })
                 let timerFun = setInterval(()=>{
-                    let time = updateTimer(io,timer,socket);
+                    let time = updateTimer(io,timer,socket,roomName);
                     closeGame(io,socket,time,this.gameRoom,roomName);
                 },1000);
                 let problemFun = setInterval(()=>{
@@ -272,7 +275,7 @@ module.exports = class CircleIO{
             if(this.gameRoom[roomName]["isTutorial"]){
                 this.initGame(io,socket,roomName);
                 io.sockets.in(roomName).emit('startGame',this.gameRoom[roomName]["players"]);
-                updateTimer(io,this.gameRoom["timer"],socket);
+                updateTimer(io,this.gameRoom[roomName]["timer"],socket,roomName);
                 initProblem(this.gameRoom,roomName);
                 emitProblem(io,roomName,socket,this.gameRoom[roomName]["problem"]);
                 this.updateCell(io,socket,roomName,objectToArray({
@@ -280,13 +283,36 @@ module.exports = class CircleIO{
                     "number" : this.gameRoom[roomName]["boardNumber"],
                     "team" : this.gameRoom[roomName]["boardTeam"],
                 }));
-                
+                console.log(objectToArray({
+                    "index" : getAllIndex(),
+                    "number" : this.gameRoom[roomName]["boardNumber"],
+                    "team" : this.gameRoom[roomName]["boardTeam"],
+                }))
+                console.log(roomName)
             }
             else{
                 this.gameRoom[roomName]["players"][username]["ready"] = true;
                 if(allUserReady(this.gameRoom[roomName]["players"])){
                     this.initGame(io,socket,roomName);
                     io.sockets.in(roomName).emit('startGame', this.gameRoom[roomName]["players"]);
+                    updateTimer(io,this.gameRoom[roomName]["timer"],socket,roomName);
+                    initProblem(this.gameRoom,roomName);
+                    emitProblem(io,roomName,socket,this.gameRoom[roomName]["problem"]);
+                    let num  = this.gameRoom[roomName]["boardNumber"];
+                    let num_flat = num.flat();
+                    let team = this.gameRoom[roomName]["boardTeam"];
+                    let team_flat = team.flat();
+                    console.log(objectToArray({
+                        "index" : getAllIndex(),
+                        "number" : num_flat,
+                        "team" : team_flat,
+                    }))
+                    console.log(roomName)
+                    this.updateCell(io,socket,roomName,objectToArray({
+                        "index" : getAllIndex(),
+                        "number" : num_flat,
+                        "team" : team_flat,
+                    }));
                 }
             }
         }
