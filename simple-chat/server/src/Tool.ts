@@ -25,4 +25,14 @@ function objectToArray(object){
     return result;
 }
 
-export {allUserReady,objectToArray};
+function flatten(array){
+    let result = [];
+    array.forEach(element => {
+        element.forEach(element2 => {
+            result.push(element2)
+        });
+    });
+    return result;
+}
+
+export {allUserReady,objectToArray,flatten};

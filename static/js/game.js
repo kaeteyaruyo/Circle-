@@ -27,7 +27,7 @@ passGlobalVariableToBullet({
 });
 
 socket.emit('startGame', username, roomname);
-
+socket.emit('updateBullet',)
 socket.on('startGame', (data) => {
     if(data[username] !== undefined)
         team = data[username].team;
@@ -48,6 +48,7 @@ socket.on('updateScore', (data) => {
 });
 
 socket.on('updateCell', (data) => {
+    console.log(data);
     data.forEach(cellInfo => {
         const cell = shapeLayer.findOne(`#cell${ cellInfo.index[0] }_${ cellInfo.index[1] }`);
         if(cell){
@@ -64,6 +65,7 @@ socket.on('updateCell', (data) => {
 });
 
 socket.on('updateBullet', (data) => {
+    console.log(data);
     data.forEach(bulletInfo => {
         shapeLayer.add(createBullet({
             index: bulletInfo.index,

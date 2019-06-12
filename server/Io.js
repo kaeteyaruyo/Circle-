@@ -232,6 +232,8 @@ module.exports = (function () {
             }
             else {
                 this.gameRoom[roomName]["players"][username]["ready"] = true;
+                socket.room = roomName;
+                socket.join(roomName);
                 if (Tool_1.allUserReady(this.gameRoom[roomName]["players"])) {
                     this.initGame(io, socket, roomName);
                     io.sockets["in"](roomName).emit('startGame', this.gameRoom[roomName]["players"]);
@@ -239,9 +241,9 @@ module.exports = (function () {
                     Problem_1.initProblem(this.gameRoom, roomName);
                     Problem_1.emitProblem(io, roomName, socket, this.gameRoom[roomName]["problem"]);
                     var num = this.gameRoom[roomName]["boardNumber"];
-                    var num_flat = num.flat();
+                    var num_flat = Tool_1.flatten(num);
                     var team = this.gameRoom[roomName]["boardTeam"];
-                    var team_flat = team.flat();
+                    var team_flat = Tool_1.flatten(team);
                     console.log(Tool_1.objectToArray({
                         "index": Random_1.getAllIndex(),
                         "number": num_flat,

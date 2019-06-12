@@ -14,11 +14,11 @@ function updateProblem(gameRoom,roomName){
 }
 function emitProblem(io,room,socket,problem){
     io.sockets.in(socket.room).emit('updateQuiz', { 
-        "quiz" : problem,
+        "problem" : problem,
     });
 }
 function initProblem(gameRoom,roomName){
-    if(typeof gameRoom[roomName]["problem"] === 'undefined'){
+    if(gameRoom[roomName]["problem"] === undefined){
         updateProblem(gameRoom,roomName);
     }
 }

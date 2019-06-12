@@ -27,3 +27,13 @@ function objectToArray(object) {
     return result;
 }
 exports.objectToArray = objectToArray;
+function flatten(array) {
+    var result = [];
+    array.forEach(function (element) {
+        element.forEach(function (element2) {
+            result.push(element2);
+        });
+    });
+    return result;
+}
+exports.flatten = flatten;

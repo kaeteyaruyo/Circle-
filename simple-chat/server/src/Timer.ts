@@ -17,7 +17,7 @@ function createTimer(){
 function closeGame(io,socket,time,gameRoom,roomName){
     if(time <= 0){
         let summary = gameRoom[roomName];
-        io.sockets.in(socket.room).emit('GameOver');
+        io.sockets.in(roomName).emit('GameOver');
         if(this.gameRoom[roomName] !== undefined){
             socket.room = "";
             socket.leave(roomName);

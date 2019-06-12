@@ -1,7 +1,7 @@
 import {updateProblem,emitProblem,initProblem} from './Problem';
 import {updateTimer,createTimer,closeGame} from './Timer';
 import {getRangeRandom,getRandomBoardNumber,initBoardTeam,getAllIndex,updateBullet,initBullet} from './Random'
-import {allUserReady,objectToArray} from './Tool'
+import {allUserReady,objectToArray,flatten} from './Tool'
 /*
 room info
 gameRoom = {
@@ -292,6 +292,8 @@ module.exports = class CircleIO{
             }
             else{
                 this.gameRoom[roomName]["players"][username]["ready"] = true;
+                socket.room = roomName;
+                socket.join(roomName);
                 if(allUserReady(this.gameRoom[roomName]["players"])){
                     this.initGame(io,socket,roomName);
                     io.sockets.in(roomName).emit('startGame', this.gameRoom[roomName]["players"]);
@@ -299,9 +301,9 @@ module.exports = class CircleIO{
                     initProblem(this.gameRoom,roomName);
                     emitProblem(io,roomName,socket,this.gameRoom[roomName]["problem"]);
                     let num  = this.gameRoom[roomName]["boardNumber"];
-                    let num_flat = num.flat();
+                    let num_flat = flatten(num);
                     let team = this.gameRoom[roomName]["boardTeam"];
-                    let team_flat = team.flat();
+                    let team_flat = flatten(team);
                     console.log(objectToArray({
                         "index" : getAllIndex(),
                         "number" : num_flat,
@@ -367,7 +369,7 @@ module.exports = class CircleIO{
         let index = data["index"];
         let value = [];
         index.forEach(element => {
-           let temp = updateBullet(this.gameRoom[roomName]["players"]["bullets"],index); 
+           let temp = updateBullet(this.gameRoom[roomName]["players"]["bullets"],element); 
            value.push(temp);
         });
         socket.emit('updateBullet',{
