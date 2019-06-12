@@ -75,14 +75,14 @@ function createCell({ row, column, number }){
             if(eval(currentQuiz)){
                 socket.emit('updateCell', roomname, [{
                     index: [cell.row, cell.column],
-                    number: cell.number,
+                    number: cell.number + number,
                     team: team,
                 }]);
             }
             else{
                 socket.emit('updateCell', roomname, [{
                     index: [cell.row, cell.column],
-                    number: cell.number,
+                    number: cell.number + number,
                     team: 0,
                 }]);
             }
@@ -103,7 +103,6 @@ function createCell({ row, column, number }){
                 number: cell.number,
                 team: team,
             });
-            console.log(victims)
             socket.emit('updateCell', roomname, victims);
         }
         else if(number === 13){
@@ -124,9 +123,9 @@ function createCell({ row, column, number }){
 
         // Update to owner's color
         const circle = cell.findOne('Circle');
-        circle.fill(fillColor[owner]);
-        circle.stroke(strokeColor[owner]);
-        cell.findOne('Text').fill(textColor[owner]);
+        circle.fill(fillColor[cell.owner]);
+        circle.stroke(strokeColor[cell.owner]);
+        cell.findOne('Text').fill(textColor[cell.owner]);
 
         // Update number label
         const label = cell.findOne('Text');
@@ -134,6 +133,7 @@ function createCell({ row, column, number }){
         label.offsetX(label.width() / 2);
         label.offsetY(label.height() / 2);
 
+        shapeLayer.draw();
         if(cell.owner !== 0){
             // Search for bundle
             const neighbors = [];
@@ -164,10 +164,11 @@ function createCell({ row, column, number }){
 
             const victims = [];
             bundle.forEach(cellName => {
-                const cell = shapeLayer.findOne(`#${ cellName }`);
+                const c = shapeLayer.findOne(`#${ cellName }`);
+                totalNumber += c.number
                 victims.push({
-                    index: [cell.row, cell.column],
-                    number: randomInt(10),
+                    index: [c.row, c.column],
+                    number: randomInt(100),
                     team: 0,
                 });
             });

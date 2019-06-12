@@ -1,4 +1,4 @@
-function createStage(width, height, createBullet){
+function createStage({width, height, username, roomname, socket}){
     const stage = new Konva.Stage({
         container: 'main__canvas',
         width: width,
@@ -125,15 +125,15 @@ function createStage(width, height, createBullet){
         const bullet = e.target;
 
         if(cell && cell.name() === 'cell'){
-            // previousShape.fire(
-            //     'drop',
-            //     {
-            //         type: 'drop',
-            //         target: previousShape,
-            //         evt: e.evt
-            //     },
-            //     true
-            // );
+            previousShape.fire(
+                'drop',
+                {
+                    type: 'drop',
+                    target: previousShape,
+                    evt: e.evt
+                },
+                true
+            );
 
             if(bullet.number === 13){
                 // Only magic ball could ignore cell's owner
@@ -145,7 +145,7 @@ function createStage(width, height, createBullet){
                 bullet.destroy();
             }
             else {
-                if(cell.owner !== 0){
+                if(cell.owner === 0){
                     if(bullet.number == 10){
                         // if it was a shuffle
                         socket.emit('shuffleBoard', roomname);
@@ -153,7 +153,23 @@ function createStage(width, height, createBullet){
                     else if(bullet.number == 12){
                         // if it was an exchange
                         const victims = [];
-                        console.log(shapeLayer.find('.cell'));
+                        shapeLayer.find('.cell').forEach(c => {
+                            if(c.owner === 1){
+                                victims.push({
+                                    index: [c.row, c.column],
+                                    number: c.number,
+                                    team: 2,
+                                });
+                            }
+                            else if(c.owner === 2){
+                                victims.push({
+                                    index: [c.row, c.column],
+                                    number: c.number,
+                                    team: 1,
+                                });
+                            }
+                        });
+                        socket.emit('updateCell', roomname, victims);
                     }
                     else{
                         cell.collision(bullet.number, bullet.team);
