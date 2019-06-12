@@ -280,7 +280,7 @@ module.exports = (function () {
             "team": team_flat
         });
         for (var i = 0; i < arr.length; i++) {
-            arr["roomName"] = roomName;
+            arr[i].roomName = roomName;
         }
         io.sockets.emit('updateCell', arr);
     };

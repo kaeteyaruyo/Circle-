@@ -343,7 +343,7 @@ module.exports = class CircleIO{
             "team" : team_flat, // score of my team
         });
         for(let i=0;i<arr.length;i++){
-            arr["roomName"] = roomName;
+            arr[i].roomName= roomName;
         }
         io.sockets.emit('updateCell',arr);
     }
