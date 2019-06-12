@@ -39,4 +39,49 @@ function getRandomProblem(problems){
     }
 };
 
-export {getRangeRandom , getRandomProblem}
+function getRandomBoardNumber(){
+    let result = [];
+    for(let row = 0; row < 7; ++row){
+        let maxColumn = (7 - Math.abs(row - 3));
+        let temp = [];
+        for(let column = 0; column < maxColumn; ++column){
+            temp.push(getRangeRandom(0,99));
+        }
+        result.push(temp);
+    }
+    return result;
+}
+
+function initBoardTeam(){
+    return [
+        [0,0,0,0],
+        [0,0,0,0,0],
+        [0,0,0,0,0,0],
+        [0,0,0,0,0,0,0],
+        [0,0,0,0,0,0],
+        [0,0,0,0,0],
+        [0,0,0,0],
+    ]
+}
+
+function initBullet(){
+    return [getRangeRandom(0,13),getRangeRandom(0,13),getRangeRandom(0,13),getRangeRandom(0,13),getRangeRandom(0,13)];
+}
+
+function updateBullet(Bullet,index){
+    let value = getRangeRandom(0,13);
+    Bullet[index] = value;
+    return value
+}
+
+function getAllIndex(){
+    let result = [];
+    for(let row = 0; row < 7; ++row){
+        let maxColumn = (7 - Math.abs(row - 3));
+        for(let column = 0; column < maxColumn; ++column){
+            result.push([row, column]);
+        }
+    }
+    return result;
+}
+export {getRangeRandom , getRandomProblem,getRandomBoardNumber,initBoardTeam,getAllIndex,initBullet,updateBullet}
