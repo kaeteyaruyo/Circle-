@@ -33,33 +33,33 @@ socket.emit('updateBullet', roomname, {
     index: [0, 1, 2, 3, 4],
 });
 
-socket.on('startGame', (data) => {
-    if(isInRoom(data.roomName) && data[username] !== undefined) {
-        team = data[username].team;
+socket.on('startGame', (res) => {
+    if(isInRoom(res.roomName) && res.players[username] !== undefined) {
+        team = res.players[username].team;
     }
 });
 
-socket.on('updateTimer', (data) => {
-    if(isInRoom(data.roomName)) {
-        stage.updateTimer(`${ data.min }:${ data.sec.toString().padStart(2, '0') }`);
+socket.on('updateTimer', (res) => {
+    if(isInRoom(res.roomName)) {
+        stage.updateTimer(`${ res.min }:${ res.sec.toString().padStart(2, '0') }`);
     }
 });
 
-socket.on('updateQuiz', (data) => {
-    if(isInRoom(data.roomName)){
-        stage.updateQuiz(data.problem);
-        cellUpdateQuiz(data.problem);
+socket.on('updateQuiz', (res) => {
+    if(isInRoom(res.roomName)){
+        stage.updateQuiz(res.problem);
+        cellUpdateQuiz(res.problem);
     }
 });
 
-socket.on('updateScore', (data) => {
-    if(isInRoom(data.roomName) && data[username] !== undefined)
-        stage.updateScore(data.score);
+socket.on('updateScore', (res) => {
+    if(isInRoom(res.roomName) && res.team === team)
+        stage.updateScore(res.score);
 });
 
-socket.on('updateCell', (data) => {
-    if(isInRoom(data.roomName)){
-        data.forEach(cellInfo => {
+socket.on('updateCell', (res) => {
+    if(isInRoom(res.roomName)){
+        res.data.forEach(cellInfo => {
             const cell = shapeLayer.findOne(`#cell${ cellInfo.index[0] }_${ cellInfo.index[1] }`);
             if(cell){
                 cell.update(cellInfo.number, cellInfo.team);
@@ -75,20 +75,18 @@ socket.on('updateCell', (data) => {
     }
 });
 
-socket.on('updateBullet', (data) => {
-    if(isInRoom(data.roomName)){
-        data.forEach(bulletInfo => {
-            shapeLayer.add(createBullet({
-                index: bulletInfo.index,
-                number: bulletInfo.bullet,
-                team: team,
-            }));
-        });
-    }
+socket.on('updateBullet', (res) => {
+    res.forEach(bulletInfo => {
+        shapeLayer.add(createBullet({
+            index: bulletInfo.index,
+            number: bulletInfo.bullet,
+            team: team,
+        }));
+    });
 });
 
-socket.on('stopGame', () => {
-    if(isInRoom(data.roomName)){
+socket.on('stopGame', (res) => {
+    if(isInRoom(res.roomName)){
         document.querySelector('.main__timesup').style.display = 'block';
         setTimeout(() => {
             window.location.href = `/summary/${ roomname }`;
