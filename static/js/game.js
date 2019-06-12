@@ -2,40 +2,44 @@ import { createStage, } from '/js/game/stage.js'
 import { passGlobalVariableToCell, createCell, cellUpdateQuiz } from '/js/game/cell.js'
 import { passGlobalVariableToBullet, createBullet } from '/js/game/bullet.js'
 
-const socket = io(window.location.origin);
-const stage = createStage(window.innerWidth, window.innerHeight - document.querySelector('.main__scoreboard').offsetHeight, createBullet);
-const shapeLayer = stage.findOne('.shapeLayer');
+let team = 0;
 const username = /Hi, ([\S]+)!/.exec(document.querySelector('.header__username').innerHTML)[1];
 const roomname = /\/game\/([\S]+)/.exec(window.location.pathname)[1];
-let team = 0;
-
-passGlobalVariableToCell({
-    user_name: username,
-    user_team: team,
-    room_name: roomname,
-    center_x: stage.findOne('.chessboard').x(),
-    center_y: stage.findOne('.chessboard').y(),
-    shape_layer: shapeLayer,
-    node_radius: stage.nodeRadius,
-    socket_: socket,
+const socket = io(window.location.origin);
+const stage = createStage({
+    width: window.innerWidth,
+    height: window.innerHeight - document.querySelector('.main__scoreboard').offsetHeight,
+    username,
+    roomname,
+    socket,
 });
-
-passGlobalVariableToBullet({
-    node_radius: stage.nodeRadius,
-    origin_x: stage.findOne('.magazine').x(),
-    origin_y: stage.findOne('.magazine').y(),
-});
+const shapeLayer = stage.findOne('.shapeLayer');
 
 socket.emit('startGame', username, roomname);
-
-socket.emit('updateBullet', roomname, {
-    username,
-    index: [0, 1, 2, 3, 4],
-});
 
 socket.on('startGame', (res) => {
     if(isInRoom(res.roomName) && res.players[username] !== undefined) {
         team = res.players[username].team;
+        passGlobalVariableToCell({
+            user_name: username,
+            user_team: team,
+            room_name: roomname,
+            center_x: stage.findOne('.chessboard').x(),
+            center_y: stage.findOne('.chessboard').y(),
+            shape_layer: shapeLayer,
+            node_radius: stage.nodeRadius,
+            socket_: socket,
+        });
+
+        passGlobalVariableToBullet({
+            node_radius: stage.nodeRadius,
+            origin_x: stage.findOne('.magazine').x(),
+            origin_y: stage.findOne('.magazine').y(),
+        });
+        socket.emit('updateBullet', roomname, {
+            username,
+            index: [0, 1, 2, 3, 4],
+        });
     }
 });
 
@@ -58,7 +62,6 @@ socket.on('updateScore', (res) => {
 });
 
 socket.on('updateCell', (res) => {
-    console.log(res);
     if(isInRoom(res.roomName)){
         res.data.forEach(cellInfo => {
             const cell = shapeLayer.findOne(`#cell${ cellInfo.index[0] }_${ cellInfo.index[1] }`);
@@ -73,11 +76,11 @@ socket.on('updateCell', (res) => {
                 }));
             }
         });
+        shapeLayer.draw();
     }
 });
 
 socket.on('updateBullet', (res) => {
-    console.log(res);
     res.forEach(bulletInfo => {
         shapeLayer.add(createBullet({
             index: bulletInfo.index,
@@ -85,6 +88,7 @@ socket.on('updateBullet', (res) => {
             team: team,
         }));
     });
+    shapeLayer.draw();
 });
 
 socket.on('stopGame', (res) => {
