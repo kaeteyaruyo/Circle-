@@ -6,7 +6,7 @@ const socket = io(window.location.origin);
 const stage = createStage(window.innerWidth, window.innerHeight - document.querySelector('.main__scoreboard').offsetHeight, createBullet);
 const shapeLayer = stage.findOne('.shapeLayer');
 const username = /Hi, ([\S]+)!/.exec(document.querySelector('.header__username').innerHTML)[1];
-const roomname = /\/game\/([\S]+)/.exec(window.location.pathname)[1];
+const roomname = username;
 let team = 0;
 
 passGlobalVariableToCell({
@@ -26,7 +26,7 @@ passGlobalVariableToBullet({
     origin_y: stage.findOne('.magazine').y(),
 });
 
-socket.emit('createRoom', user.name, true);
+socket.emit('createRoom', username, true);
 
 socket.emit('startGame', username, roomname);
 
