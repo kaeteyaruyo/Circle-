@@ -194,7 +194,6 @@ module.exports = (function () {
                 this.gameRoom[roomName]["boardTeam"] = Random_1.initBoardTeam();
                 var timerFun = setInterval(function () {
                     var time = Timer_1.updateTimer(io, timer, socket, roomName);
-                    console.log("hi");
                     Timer_1.closeGame(io, socket, time, _this.gameRoom, roomName);
                 }, 1000);
                 var problemFun = setInterval(function () {
@@ -221,17 +220,21 @@ module.exports = (function () {
                 Timer_1.updateTimer(io, this.gameRoom[roomName]["timer"], socket, roomName);
                 Problem_1.initProblem(this.gameRoom, roomName);
                 Problem_1.emitProblem(io, roomName, socket, this.gameRoom[roomName]["problem"]);
-                this.updateCell(io, socket, roomName, Tool_1.objectToArray({
-                    "index": Random_1.getAllIndex(),
-                    "number": this.gameRoom[roomName]["boardNumber"],
-                    "team": this.gameRoom[roomName]["boardTeam"]
-                }));
+                var num = this.gameRoom[roomName]["boardNumber"];
+                var num_flat = Tool_1.flatten(num);
+                var team = this.gameRoom[roomName]["boardTeam"];
+                var team_flat = Tool_1.flatten(team);
                 console.log(Tool_1.objectToArray({
                     "index": Random_1.getAllIndex(),
-                    "number": this.gameRoom[roomName]["boardNumber"],
-                    "team": this.gameRoom[roomName]["boardTeam"]
+                    "number": num_flat,
+                    "team": team_flat
                 }));
                 console.log(roomName);
+                this.updateCell(io, socket, roomName, Tool_1.objectToArray({
+                    "index": Random_1.getAllIndex(),
+                    "number": num_flat,
+                    "team": team_flat
+                }));
             }
             else {
                 this.gameRoom[roomName]["players"][username]["ready"] = true;

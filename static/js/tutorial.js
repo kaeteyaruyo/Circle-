@@ -61,7 +61,7 @@ socket.on('updateScore', (data) => {
 
 socket.on('updateCell', (data) => {
     if(isInRoom(data.roomName)){
-        data.forEach(cellInfo => {
+        data.data.forEach(cellInfo => {
             const cell = shapeLayer.findOne(`#cell${ cellInfo.index[0] }_${ cellInfo.index[1] }`);
             if(cell){
                 cell.update(cellInfo.number, cellInfo.team);

@@ -281,17 +281,21 @@ module.exports = class CircleIO{
                 updateTimer(io,this.gameRoom[roomName]["timer"],socket,roomName);
                 initProblem(this.gameRoom,roomName);
                 emitProblem(io,roomName,socket,this.gameRoom[roomName]["problem"]);
-                this.updateCell(io,socket,roomName,objectToArray({
-                    "index" : getAllIndex(),
-                    "number" : this.gameRoom[roomName]["boardNumber"],
-                    "team" : this.gameRoom[roomName]["boardTeam"],
-                }));
+                let num  = this.gameRoom[roomName]["boardNumber"];
+                let num_flat = flatten(num);
+                let team = this.gameRoom[roomName]["boardTeam"];
+                let team_flat = flatten(team);
                 console.log(objectToArray({
                     "index" : getAllIndex(),
-                    "number" : this.gameRoom[roomName]["boardNumber"],
-                    "team" : this.gameRoom[roomName]["boardTeam"],
+                    "number" : num_flat,
+                    "team" : team_flat,
                 }))
                 console.log(roomName)
+                this.updateCell(io,socket,roomName,objectToArray({
+                    "index" : getAllIndex(),
+                    "number" : num_flat,
+                    "team" : team_flat,
+                }));
             }
             else{
                 this.gameRoom[roomName]["players"][username]["ready"] = true;
