@@ -3,21 +3,37 @@ const strokeColor = [ '#BABDBF', '#913108', '#111B1D', ];
 const textColor = [ '#53575A', '#FCDCCF', '#DFEAEC', ];
 const bundleTable = new Map();
 
+let username = null;
+let userteam = null;
+let roomname = null;
 let centerX = null;
 let centerY = null;
 let nodeRadius = null;
 let shapeLayer = null;
+let socket = null;
 let currentQuiz = '';
-let score = 0;
 
-function passGlobalVariableToCell({ center_x, center_y, shape_layer, node_radius }){
+function passGlobalVariableToCell({
+    user_name,
+    user_team,
+    room_name,
+    center_x,
+    center_y,
+    node_radius,
+    shape_layer,
+    socket_,
+}){
+    username = user_name;
+    userteam = user_team;
+    roomname = room_name;
     centerX = center_x;
     centerY = center_y;
-    shapeLayer = shape_layer;
     nodeRadius = node_radius;
+    shapeLayer = shape_layer;
+    socket = socket_;
 }
 
-function createCell({ row, column, }){
+function createCell({ row, column, number }){
     // Create cell object
     const cell = new Konva.Group({
         x: centerX + (Math.abs(row - 3) - 6 + 2 * column) * nodeRadius,
@@ -25,13 +41,14 @@ function createCell({ row, column, }){
     });
 
     // Add member variable
-    cell.name(`cell${ row }_${ column }`);
+    cell.name(`cell`);
+    cell.id(`cell${ row }_${ column }`);
     cell.row = row;
     cell.column = column;
-    cell.number = randomInt(10);
+    cell.number = number;
     cell.owner = 0; // 0 for no one, 1 for red team, 2 for green team
     cell.neighbor = findNeightbor(row, column);
-    bundleTable.set(cell.name(), null);
+    bundleTable.set(cell.id(), null);
 
     cell.add(new Konva.Circle({
         radius: nodeRadius,
@@ -51,72 +68,117 @@ function createCell({ row, column, }){
 
     cell.add(text);
 
-    // Add member function
-    cell.addNumber = (number, team) => {
-        cell.number += number;
+    cell.collision = (number, team) => {
+        if(number < 10){
+            // If it was a number bullet
+            const x = cell.number + number;
+            if(eval(currentQuiz)){
+                socket.emit('updateCell', roomname, [{
+                    index: [cell.row, cell.column],
+                    number: cell.number,
+                    team: team,
+                }]);
+            }
+            else{
+                socket.emit('updateCell', roomname, [{
+                    index: [cell.row, cell.column],
+                    number: cell.number,
+                    team: 0,
+                }]);
+            }
+        }
+        else if(number === 11){
+            // If it was a bomb
+            const victims = [];
+            cell.neighbor.forEach(n => {
+                const neighborCell = shapeLayer.findOne(`#${ n }`);
+                victims.push({
+                    index: [neighborCell.row, neighborCell.column],
+                    number: neighborCell.number,
+                    team: team,
+                });
+            });
+            victims.push({
+                index: [cell.row, cell.column],
+                number: cell.number,
+                team: team,
+            });
+            console.log(victims)
+            socket.emit('updateCell', roomname, victims);
+        }
+        else if(number === 13){
+            // If it was a magic ball
+            socket.emit('updateCell', roomname, [{
+                index: [cell.row, cell.column],
+                number: cell.number,
+                team: team,
+            }]);
+        }
 
+    };
+
+    // Add member function
+    cell.update = (number, team) => {
+        cell.owner = team;
+        cell.number = number
+
+        // Update to owner's color
+        const circle = cell.findOne('Circle');
+        circle.fill(fillColor[owner]);
+        circle.stroke(strokeColor[owner]);
+        cell.findOne('Text').fill(textColor[owner]);
+
+        // Update number label
         const label = cell.findOne('Text');
         label.text(cell.number);
         label.offsetX(label.width() / 2);
         label.offsetY(label.height() / 2);
 
-        const x = cell.number;
-        if(eval(currentQuiz))
-            cell.freeze(team);
-    }
+        if(cell.owner !== 0){
+            // Search for bundle
+            const neighbors = [];
+            cell.neighbor.forEach(n => {
+                const neighborCell = shapeLayer.findOne(`#${ n }`);
+                if(neighborCell.owner === cell.owner){
+                    neighbors.push(n);
+                }
+            });
 
-    cell.freeze = (owner) => {
-        // Set owner
-        cell.owner = owner;
-
-        // Change to owner's color
-        const circle = cell.find('Circle');
-        circle.fill(fillColor[owner]);
-        circle.stroke(strokeColor[owner]);
-        cell.find('Text').fill(textColor[owner]);
-
-        // Search for bundle
-        const neighbors = [];
-        cell.neighbor.forEach(n => {
-            const neighborCell = shapeLayer.findOne(`.${ n }`);
-            if(neighborCell.owner === owner){
-                neighbors.push(n);
-            }
-        });
-
-        bundleTable.set(cell.name(), cell.name());
-        neighbors.forEach(n => {
-            const root = findRoot(n)
-            bundleTable.set(root, cell.name());
-        });
+            bundleTable.set(cell.id(), cell.id());
+            neighbors.forEach(n => {
+                const root = findRoot(n)
+                bundleTable.set(root, cell.id());
+            });
+        }
+        else {
+            bundleTable.set(cell.id(), null);
+        }
     }
 
     cell.consume = () => {
-        if(cell.owner !== 0){
-            const root = findRoot(cell.name());
+        if(cell.owner === userteam){
+            const root = findRoot(cell.id());
             const bundle = collectBundle(root).concat(root);
             const bonus = bundle.length;
             let totalNumber = 0;
 
+            const victims = [];
             bundle.forEach(cellName => {
-                const c = shapeLayer.findOne(`.${ cellName }`);
-                totalNumber += c.number;
-                shapeLayer.add(createCell({
-                    row: c.row,
-                    column: c.column,
-                }));
-                bundleTable[cellName] = null;
-                c.destroy();
-                shapeLayer.draw();
+                const cell = shapeLayer.findOne(`#${ cellName }`);
+                victims.push({
+                    index: [cell.row, cell.column],
+                    number: randomInt(10),
+                    team: 0,
+                });
             });
-            score += totalNumber * bonus;
-            document.querySelector('.main__scoreboard--score').innerHTML = score.toString();
+            socket.emit('updateCell', roomname, victims);
+            socket.emit('getScore', roomname, userteam, totalNumber * bonus);
         }
     }
 
     // Add event listener
     cell.on('mouseover', () => {
-        if(cell.owner !== 0)
+        if(cell.owner === userteam)
             document.body.style.cursor = 'pointer';
         else
             document.body.style.cursor = 'default';

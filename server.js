@@ -83,4 +83,11 @@ app.get('/game/:roomName', middleware.renderSetting, middleware.checkLogin, (req
     });
 });
 
+app.get('/summary/:roomName', middleware.renderSetting, middleware.checkLogin, (req, res) => {
+    res.render('summary', {
+        title: `${ roomName }'s Room`,
+        username: req.session.username,
+    });
+});
+
 server.listen(config.port);
