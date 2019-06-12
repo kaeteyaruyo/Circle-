@@ -1,0 +1,85 @@
+.main__summary {
+    margin: 0 auto;
+    display: grid;
+    grid-template-areas:
+    'summary summary'
+    'team1 team2'
+    'winner winner'
+    'ok ok';
+    justify-items: center;
+    align-items: center;
+    justify-content: center;
+    justify-self: center;
+    width: 96vw;
+    height: min-content;
+}
+
+.main__summary--title {
+    grid-area: summary;
+    font-size: 4rem;
+    color: #38595E;
+}
+
+.main__score {
+    width: 40vw;
+    border: 3px solid;
+    border-radius: 1rem;
+    font-size: 3rem;
+    margin: 1rem .5rem;
+}
+
+.main__score--team1 {
+    grid-area: team1;
+    border-color: #913108;
+    background: #F4733D;
+    color: #FCDCCF;
+}
+
+.main__score--team2 {
+    grid-area: team2;
+    border-color: #111B1D;
+    background: #38595E;
+    color: #DFEAEC;
+}
+
+.main__winner {
+    grid-area: winner;
+    width: 80vw;
+    border: #2CC0B3 3px solid;
+    border-radius: 1rem;
+    font-size: 4rem;
+    margin: 1rem .5rem;
+    background-color: #2CC0B3;
+    color: #F6F7F8
+}
+
+.main__ok {
+    grid-area: ok;
+    padding: .25rem .5rem;
+    background: #F6F7F8;
+    border: #2CC0B3 1px solid;
+    border-radius: 2rem;
+    font-size: 2rem;
+    font-weight: bold;
+    color: #2CC0B3;
+    cursor: pointer;
+}
+
+.main__ok:hover {
+    background: #2CC0B3;
+    color: #F6F7F8;
+}
+
+@media only screen and (max-width: 600px) {
+    .main__summary {
+        grid-template-areas:
+        'summary'
+        'team1'
+        'team2'
+        'winner'
+        'ok';
+    }
+    .main__score {
+        width: 80vw;
+    }
+}

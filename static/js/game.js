@@ -36,10 +36,7 @@ socket.on('startGame', (res) => {
             origin_x: stage.findOne('.magazine').x(),
             origin_y: stage.findOne('.magazine').y(),
         });
-        socket.emit('updateBullet', roomname, {
-            username,
-            index: [0, 1, 2, 3, 4],
-        });
+        socket.emit('getBullet', roomname, username);
     }
 });
 
@@ -62,7 +59,6 @@ socket.on('updateScore', (res) => {
 });
 
 socket.on('updateCell', (res) => {
-    console.log(res)
     if(isInRoom(res.roomName)){
         res.data.forEach(cellInfo => {
             const cell = shapeLayer.findOne(`#cell${ cellInfo.index[0] }_${ cellInfo.index[1] }`);
