@@ -7,7 +7,7 @@ const stage = createStage(window.innerWidth, window.innerHeight - document.query
 const shapeLayer = stage.findOne('.shapeLayer');
 const username = /Hi, ([\S]+)!/.exec(document.querySelector('.header__username').innerHTML)[1];
 const roomname = /\/game\/([\S]+)/.exec(window.location.pathname)[1];
-const team = 0;
+let team = 0;
 
 passGlobalVariableToCell({
     user_name: username,
@@ -76,7 +76,7 @@ socket.on('updateBullet', (data) => {
 socket.on('stopGame', () => {
     document.querySelector('.main__timesup').style.display = 'block';
     setTimeout(() => {
-        window.location.href = `/summary/${ room.owner }`;
+        window.location.href = `/summary/${ roomname }`;
     }, 3000);
 });
 

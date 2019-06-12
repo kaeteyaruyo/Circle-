@@ -77,7 +77,7 @@ app.get('/tutorial', middleware.renderSetting, middleware.checkLogin, (req, res)
 
 app.get('/game/:roomName', middleware.renderSetting, middleware.checkLogin, (req, res) => {
     res.render('game', {
-        title: `${ roomName }'s Room`,
+        title: `${ req.params.roomName }'s Room`,
         username: req.session.username,
         mainFile: 'game'
     });
