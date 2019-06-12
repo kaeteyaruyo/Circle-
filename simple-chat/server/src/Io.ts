@@ -235,7 +235,7 @@ module.exports = class CircleIO{
 
     protected enterGame(io,socket,roomName){
         console.log("enterGame");
-        io.sockets.to(roomName).emit('enterGame',{
+        io.sockets.emit('enterGame',{
             "roomName" : roomName
         });
     }
@@ -254,6 +254,7 @@ module.exports = class CircleIO{
                 this.gameRoom[roomName]["boardTeam"] = initBoardTeam();
                 let timerFun = setInterval(()=>{
                     let time = updateTimer(io,timer,socket,roomName);
+                    console.log("hi");
                     closeGame(io,socket,time,this.gameRoom,roomName);
                 },1000);
                 let problemFun = setInterval(()=>{
@@ -273,7 +274,10 @@ module.exports = class CircleIO{
         else{
             if(this.gameRoom[roomName]["isTutorial"]){
                 this.initGame(io,socket,roomName);
-                io.sockets.to(roomName).emit('startGame',this.gameRoom[roomName]["players"]);
+                io.sockets.emit('startGame',{
+                    roomName : roomName,
+                    players : this.gameRoom[roomName]["players"]
+                });
                 updateTimer(io,this.gameRoom[roomName]["timer"],socket,roomName);
                 initProblem(this.gameRoom,roomName);
                 emitProblem(io,roomName,socket,this.gameRoom[roomName]["problem"]);
@@ -293,7 +297,10 @@ module.exports = class CircleIO{
                 this.gameRoom[roomName]["players"][username]["ready"] = true;
                 if(allUserReady(this.gameRoom[roomName]["players"])){
                     this.initGame(io,socket,roomName);
-                    io.sockets.to(roomName).emit('startGame', this.gameRoom[roomName]["players"]);
+                    io.sockets.emit('startGame',{
+                        roomName : roomName,
+                        players : this.gameRoom[roomName]["players"]
+                    });
                     updateTimer(io,this.gameRoom[roomName]["timer"],socket,roomName);
                     initProblem(this.gameRoom,roomName);
                     emitProblem(io,roomName,socket,this.gameRoom[roomName]["problem"]);
@@ -325,7 +332,8 @@ module.exports = class CircleIO{
         else if(team === 2){
             currentScore = this.gameRoom[roomName]["greenPoint"]  = this.gameRoom[roomName]["greenPoint"] + score;
         }
-        io.sockets.to(socket.room).emit('updateScore',{
+        io.sockets.emit('updateScore',{
+            "roomName" : roomName,
             "team": team,
             "score": currentScore, // score of my team
         });
@@ -335,7 +343,8 @@ module.exports = class CircleIO{
         let boardNumber = getRandomBoardNumber();
         this.gameRoom[roomName]["boardNumber"] = boardNumber;
         let index = getAllIndex();
-        io.sockets.to(roomName).emit('updateCell',objectToArray({
+        io.sockets.emit('updateCell',objectToArray({
+            "roomName" : roomName,
             "index" : index,
             "number" : this.gameRoom[roomName]["boardNumber"],
             "team" : this.gameRoom[roomName]["boardTeam"], // score of my team
@@ -351,11 +360,15 @@ module.exports = class CircleIO{
             this.gameRoom[roomName]["boardNumber"][row][col] = number;
             this.gameRoom[roomName]["boardTeam"][row][col] = team;
         });
-        io.sockets.to(roomName).emit('updateCell',data);
+        io.sockets.emit('updateCell',{
+            "roomName" : roomName,
+            data : data
+        });
     }
 
     protected summary(io,socket,roomName){
-        io.sockets.to(roomName).emit('summary',{
+        io.sockets.emit('summary',{
+            "roomName" : roomName,
             "redScore" : this.gameRoom[roomName]["redPoint"],
             "greenScore" : this.gameRoom[roomName]["greenPoint"]
         });
@@ -371,10 +384,10 @@ module.exports = class CircleIO{
            value.push(temp);
         });
         console.log(this.gameRoom[roomName]["players"][username]["bullets"]);
-        socket.emit('updateBullet',{
+        socket.emit('updateBullet',objectToArray({
             "index" : index,
             "bullet" : value
-        });
+        }));
     }
 }
 

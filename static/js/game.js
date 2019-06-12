@@ -34,12 +34,13 @@ socket.emit('updateBullet', roomname, {
 });
 
 socket.on('startGame', (data) => {
+    console.log(data);
     if(data[username] !== undefined)
         team = data[username].team;
 });
 
 socket.on('updateTimer', (data) => {
-    console.log(data);
+    console.log("uptimer");
     stage.updateTimer(`${ data.min }:${ data.sec.toString().padStart(2, '0') }`);
 });
 

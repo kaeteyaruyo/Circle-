@@ -42,10 +42,7 @@ module.exports = (function () {
             });
             socket.on('startGame', function (username, roomName) {
                 socket.room = roomName;
-                socket.join(roomName, function () {
-                    console.log(socket.adapter.rooms);
-                    _this.startGame(io, socket, username, roomName);
-                });
+                _this.startGame(io, socket, username, roomName);
             });
             socket.on('getScore', function (roomName, point, team) {
                 _this.getScore(io, socket, roomName, point, team);
@@ -179,7 +176,7 @@ module.exports = (function () {
     };
     CircleIO.prototype.enterGame = function (io, socket, roomName) {
         console.log("enterGame");
-        io.sockets.to(roomName).emit('enterGame', {
+        io.sockets.emit('enterGame', {
             "roomName": roomName
         });
     };
@@ -197,6 +194,7 @@ module.exports = (function () {
                 this.gameRoom[roomName]["boardTeam"] = Random_1.initBoardTeam();
                 var timerFun = setInterval(function () {
                     var time = Timer_1.updateTimer(io, timer, socket, roomName);
+                    console.log("hi");
                     Timer_1.closeGame(io, socket, time, _this.gameRoom, roomName);
                 }, 1000);
                 var problemFun = setInterval(function () {
@@ -216,7 +214,10 @@ module.exports = (function () {
         else {
             if (this.gameRoom[roomName]["isTutorial"]) {
                 this.initGame(io, socket, roomName);
-                io.sockets.to(roomName).emit('startGame', this.gameRoom[roomName]["players"]);
+                io.sockets.emit('startGame', {
+                    roomName: roomName,
+                    players: this.gameRoom[roomName]["players"]
+                });
                 Timer_1.updateTimer(io, this.gameRoom[roomName]["timer"], socket, roomName);
                 Problem_1.initProblem(this.gameRoom, roomName);
                 Problem_1.emitProblem(io, roomName, socket, this.gameRoom[roomName]["problem"]);
@@ -236,7 +237,10 @@ module.exports = (function () {
                 this.gameRoom[roomName]["players"][username]["ready"] = true;
                 if (Tool_1.allUserReady(this.gameRoom[roomName]["players"])) {
                     this.initGame(io, socket, roomName);
-                    io.sockets.to(roomName).emit('startGame', this.gameRoom[roomName]["players"]);
+                    io.sockets.emit('startGame', {
+                        roomName: roomName,
+                        players: this.gameRoom[roomName]["players"]
+                    });
                     Timer_1.updateTimer(io, this.gameRoom[roomName]["timer"], socket, roomName);
                     Problem_1.initProblem(this.gameRoom, roomName);
                     Problem_1.emitProblem(io, roomName, socket, this.gameRoom[roomName]["problem"]);
@@ -267,7 +271,8 @@ module.exports = (function () {
         else if (team === 2) {
             currentScore = this.gameRoom[roomName]["greenPoint"] = this.gameRoom[roomName]["greenPoint"] + score;
         }
-        io.sockets.to(socket.room).emit('updateScore', {
+        io.sockets.emit('updateScore', {
+            "roomName": roomName,
             "team": team,
             "score": currentScore
         });
@@ -276,7 +281,8 @@ module.exports = (function () {
         var boardNumber = Random_1.getRandomBoardNumber();
         this.gameRoom[roomName]["boardNumber"] = boardNumber;
         var index = Random_1.getAllIndex();
-        io.sockets.to(roomName).emit('updateCell', Tool_1.objectToArray({
+        io.sockets.emit('updateCell', Tool_1.objectToArray({
+            "roomName": roomName,
             "index": index,
             "number": this.gameRoom[roomName]["boardNumber"],
             "team": this.gameRoom[roomName]["boardTeam"]
@@ -292,10 +298,14 @@ module.exports = (function () {
             _this.gameRoom[roomName]["boardNumber"][row][col] = number;
             _this.gameRoom[roomName]["boardTeam"][row][col] = team;
         });
-        io.sockets.to(roomName).emit('updateCell', data);
+        io.sockets.emit('updateCell', {
+            "roomName": roomName,
+            data: data
+        });
     };
     CircleIO.prototype.summary = function (io, socket, roomName) {
-        io.sockets.to(roomName).emit('summary', {
+        io.sockets.emit('summary', {
+            "roomName": roomName,
             "redScore": this.gameRoom[roomName]["redPoint"],
             "greenScore": this.gameRoom[roomName]["greenPoint"]
         });
@@ -311,10 +321,10 @@ module.exports = (function () {
             value.push(temp);
         });
         console.log(this.gameRoom[roomName]["players"][username]["bullets"]);
-        socket.emit('updateBullet', {
+        socket.emit('updateBullet', Tool_1.objectToArray({
             "index": index,
             "bullet": value
-        });
+        }));
     };
     return CircleIO;
 }());

@@ -13,7 +13,8 @@ function updateProblem(gameRoom,roomName){
     gameRoom[roomName]["problem"] = problem;
 }
 function emitProblem(io,room,socket,problem){
-    io.sockets.to(socket.room).emit('updateQuiz', { 
+    io.sockets.emit('updateQuiz', { 
+        "roomName" : room,
         "problem" : problem,
     });
 }
