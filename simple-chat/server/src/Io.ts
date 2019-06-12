@@ -254,7 +254,7 @@ module.exports = class CircleIO{
                 this.gameRoom[roomName]["boardTeam"] = initBoardTeam();
                 let timerFun = setInterval(()=>{
                     let time = updateTimer(io,timer,socket,roomName);
-                    console.log("hi");
+                    //console.log("hi");
                     closeGame(io,socket,time,this.gameRoom,roomName);
                 },1000);
                 let problemFun = setInterval(()=>{

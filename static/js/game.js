@@ -33,47 +33,52 @@ socket.emit('updateBullet', roomname, {
     index: [0, 1, 2, 3, 4],
 });
 
-socket.on('startGame', (data) => {
-    console.log(data);
-    if(data[username] !== undefined)
-        team = data[username].team;
+socket.on('startGame', (res) => {
+    if(isInRoom(res.roomName) && res.players[username] !== undefined) {
+        team = res.players[username].team;
+    }
 });
 
-socket.on('updateTimer', (data) => {
-    console.log("uptimer");
-    stage.updateTimer(`${ data.min }:${ data.sec.toString().padStart(2, '0') }`);
+socket.on('updateTimer', (res) => {
+    if(isInRoom(res.roomName)) {
+        stage.updateTimer(`${ res.min }:${ res.sec.toString().padStart(2, '0') }`);
+    }
 });
 
-socket.on('updateQuiz', (data) => {
-    stage.updateQuiz(data.problem);
-    cellUpdateQuiz(data.problem);
+socket.on('updateQuiz', (res) => {
+    if(isInRoom(res.roomName)){
+        stage.updateQuiz(res.problem);
+        cellUpdateQuiz(res.problem);
+    }
 });
 
-socket.on('updateScore', (data) => {
-    if(data[username] !== undefined)
-        stage.updateScore(data.score);
+socket.on('updateScore', (res) => {
+    if(isInRoom(res.roomName) && res.team === team)
+        stage.updateScore(res.score);
 });
 
-socket.on('updateCell', (data) => {
-    console.log(data);
-    data.forEach(cellInfo => {
-        const cell = shapeLayer.findOne(`#cell${ cellInfo.index[0] }_${ cellInfo.index[1] }`);
-        if(cell){
-            cell.update(cellInfo.number, cellInfo.team);
-        }
-        else {
-            shapeLayer.add(createCell({
-                row: cellInfo.index[0],
-                column: cellInfo.index[1],
-                number: cellInfo.number,
-            }));
-        }
-    });
+socket.on('updateCell', (res) => {
+    console.log(res);
+    if(isInRoom(res.roomName)){
+        res.data.forEach(cellInfo => {
+            const cell = shapeLayer.findOne(`#cell${ cellInfo.index[0] }_${ cellInfo.index[1] }`);
+            if(cell){
+                cell.update(cellInfo.number, cellInfo.team);
+            }
+            else {
+                shapeLayer.add(createCell({
+                    row: cellInfo.index[0],
+                    column: cellInfo.index[1],
+                    number: cellInfo.number,
+                }));
+            }
+        });
+    }
 });
 
-socket.on('updateBullet', (data) => {
-    console.log(data);
-    data.forEach(bulletInfo => {
+socket.on('updateBullet', (res) => {
+    console.log(res);
+    res.forEach(bulletInfo => {
         shapeLayer.add(createBullet({
             index: bulletInfo.index,
             number: bulletInfo.bullet,
@@ -82,12 +87,18 @@ socket.on('updateBullet', (data) => {
     });
 });
 
-socket.on('stopGame', () => {
-    document.querySelector('.main__timesup').style.display = 'block';
-    setTimeout(() => {
-        window.location.href = `/summary/${ roomname }`;
-    }, 3000);
+socket.on('stopGame', (res) => {
+    if(isInRoom(res.roomName)){
+        document.querySelector('.main__timesup').style.display = 'block';
+        setTimeout(() => {
+            window.location.href = `/summary/${ roomname }`;
+        }, 3000);
+    }
 });
 
 stage.fitStageIntoParentContainer();
 window.addEventListener('resize', stage.fitStageIntoParentContainer);
+
+function isInRoom(roomName){
+    return roomname === roomName;
+}
