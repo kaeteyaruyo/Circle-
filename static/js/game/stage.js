@@ -146,11 +146,11 @@ function createStage({width, height, username, roomname, socket}){
             }
             else {
                 if(cell.owner === 0){
-                    if(bullet.number == 10){
+                    if(bullet.number === 10){
                         // if it was a shuffle
                         socket.emit('shuffleBoard', roomname);
                     }
-                    else if(bullet.number == 12){
+                    else if(bullet.number === 12){
                         // if it was an exchange
                         const victims = [];
                         shapeLayer.find('.cell').forEach(c => {
