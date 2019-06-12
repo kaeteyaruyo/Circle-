@@ -3,7 +3,7 @@ import {getRangeRandom , getRandomProblem } from './Random';
 import * as path from 'path';
 
 const problems = {
-    "keys": ["basic", "function", "special"],
+    "keys": ["basic", "function"],
     "basic": ["<", "==", ">", "%"],
     "function": ["isSquare(x)", "isPrime(x)", "inFibonacci(x)", "isPower2(x)"],
 };

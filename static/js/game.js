@@ -62,6 +62,7 @@ socket.on('updateScore', (res) => {
 });
 
 socket.on('updateCell', (res) => {
+    console.log(res)
     if(isInRoom(res.roomName)){
         res.data.forEach(cellInfo => {
             const cell = shapeLayer.findOne(`#cell${ cellInfo.index[0] }_${ cellInfo.index[1] }`);

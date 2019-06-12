@@ -7,11 +7,11 @@ exports.getRangeRandom = getRangeRandom;
 ;
 function getRandomProblem(problems) {
     var keys = problems['keys'];
-    var indexOfKeys = getRangeRandom(0, 3);
+    var indexOfKeys = getRangeRandom(0, 2);
     var problemOfClass = keys[indexOfKeys];
     var problemList = problems[problemOfClass];
     if (problemOfClass === "basic") {
-        var index = getRangeRandom(0, problemList.length - 1);
+        var index = getRangeRandom(0, problemList.length);
         var problem = problemList[index];
         if (problem === "%") {
             var n = getRangeRandom(0, 100);
@@ -73,7 +73,10 @@ function initBullet() {
 }
 exports.initBullet = initBullet;
 function updateBullet(Bullet, index) {
-    var value = getRangeRandom(0, 13);
+    var value = getRangeRandom(0, 14);
+    if (value === 0) {
+        value = getRangeRandom(10, 14);
+    }
     Bullet[index] = value;
     return value;
 }

@@ -4,11 +4,11 @@ function getRangeRandom(min,max){
 
 function getRandomProblem(problems){
     let keys = problems['keys'];
-    let indexOfKeys = getRangeRandom(0,3);
+    let indexOfKeys = getRangeRandom(0,2);
     let problemOfClass = keys[indexOfKeys];
     let problemList = problems[problemOfClass];
     if (problemOfClass === "basic"){
-        let index = getRangeRandom(0,problemList.length-1)
+        let index = getRangeRandom(0,problemList.length)
         let problem = problemList[index];
         if(problem === "%"){
             let n = getRangeRandom(0,100);
@@ -69,7 +69,10 @@ function initBullet(){
 }
 
 function updateBullet(Bullet,index){
-    let value = getRangeRandom(0,13);
+    let value = getRangeRandom(0,14);
+    if(value === 0){
+        value = getRangeRandom(10,14);
+    }
     Bullet[index] = value;
     return value
 }

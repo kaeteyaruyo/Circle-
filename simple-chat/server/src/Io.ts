@@ -337,12 +337,15 @@ module.exports = class CircleIO{
         let num_flat = flatten(num);
         let team = this.gameRoom[roomName]["boardTeam"];
         let team_flat = flatten(team);
-        io.sockets.emit('updateCell',objectToArray({
-            "roomName" : roomName,
+        let arr = objectToArray({
             "index" : index,
             "number" : num_flat,
             "team" : team_flat, // score of my team
-        }));
+        });
+        for(let i=0;i<arr.length;i++){
+            arr["roomName"] = roomName;
+        }
+        io.sockets.emit('updateCell',arr);
     }
 
     protected updateCell(io,socket,roomName, data){
