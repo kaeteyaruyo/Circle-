@@ -30,6 +30,11 @@ socket.emit('createRoom', user.name, true);
 
 socket.emit('startGame', username, roomname);
 
+socket.emit('updateBullet', roomname, {
+    username,
+    index: [0, 1, 2, 3, 4],
+});
+
 socket.on('startGame', (data) => {
     if(data[username] !== undefined)
         team = data[username].team;
