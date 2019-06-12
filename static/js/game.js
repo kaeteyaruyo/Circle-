@@ -27,13 +27,19 @@ passGlobalVariableToBullet({
 });
 
 socket.emit('startGame', username, roomname);
-socket.emit('updateBullet',)
+
+socket.emit('updateBullet', roomname, {
+    username,
+    index: [0, 1, 2, 3, 4],
+});
+
 socket.on('startGame', (data) => {
     if(data[username] !== undefined)
         team = data[username].team;
 });
 
 socket.on('updateTimer', (data) => {
+    console.log(data);
     stage.updateTimer(`${ data.min }:${ data.sec.toString().padStart(2, '0') }`);
 });
 
@@ -78,7 +84,7 @@ socket.on('updateBullet', (data) => {
 socket.on('stopGame', () => {
     document.querySelector('.main__timesup').style.display = 'block';
     setTimeout(() => {
-        window.location.href = `/summary/${ room.owner }`;
+        window.location.href = `/summary/${ roomname }`;
     }, 3000);
 });
 

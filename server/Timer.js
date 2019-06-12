@@ -6,7 +6,7 @@ function updateTimer(io, Timer, socket, roomName) {
     var passTime = 180 - Math.floor((now - start) / 1000);
     var min = Math.floor(passTime / 60);
     var sec = Math.floor(passTime % 60);
-    io.sockets["in"](roomName).emit('updateTimer', {
+    io.sockets.to(roomName).emit('updateTimer', {
         min: min,
         sec: sec
     });
@@ -20,7 +20,7 @@ exports.createTimer = createTimer;
 function closeGame(io, socket, time, gameRoom, roomName) {
     if (time <= 0) {
         var summary = gameRoom[roomName];
-        io.sockets["in"](socket.room).emit('GameOver');
+        io.sockets.to(roomName).emit('GameOver');
         if (this.gameRoom[roomName] !== undefined) {
             socket.room = "";
             socket.leave(roomName);

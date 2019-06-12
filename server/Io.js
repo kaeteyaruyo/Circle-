@@ -41,7 +41,11 @@ module.exports = (function () {
                 _this.initGame(io, socket, roomName);
             });
             socket.on('startGame', function (username, roomName) {
-                _this.startGame(io, socket, username, roomName);
+                socket.room = roomName;
+                socket.join(roomName, function () {
+                    console.log(socket.adapter.rooms);
+                    _this.startGame(io, socket, username, roomName);
+                });
             });
             socket.on('getScore', function (roomName, point, team) {
                 _this.getScore(io, socket, roomName, point, team);
@@ -75,7 +79,8 @@ module.exports = (function () {
             if (isTutorial) {
                 this.gameRoom[username]["players"][username] = {
                     "team": 1,
-                    "ready": false
+                    "ready": false,
+                    "bullets": [0, 0, 0, 0, 0]
                 };
                 this.gameRoom[username]["redTeamCount"] = 1;
             }
@@ -111,7 +116,8 @@ module.exports = (function () {
             }
             thisRoom["players"][username] = {
                 "team": team,
-                "ready": false
+                "ready": false,
+                "bullets": [0, 0, 0, 0, 0]
             };
             io.sockets.emit('joinRoom', {
                 "joinedPlayer": username,
@@ -173,7 +179,7 @@ module.exports = (function () {
     };
     CircleIO.prototype.enterGame = function (io, socket, roomName) {
         console.log("enterGame");
-        io.sockets["in"](roomName).emit('enterGame', {
+        io.sockets.to(roomName).emit('enterGame', {
             "roomName": roomName
         });
     };
@@ -189,9 +195,6 @@ module.exports = (function () {
                 this.gameRoom[roomName]["timer"] = timer;
                 this.gameRoom[roomName]["boardNumber"] = Random_1.getRandomBoardNumber();
                 this.gameRoom[roomName]["boardTeam"] = Random_1.initBoardTeam();
-                Object.keys(this.gameRoom[roomName]["players"]).forEach(function (player) {
-                    _this.gameRoom[roomName]["players"][player]["bullets"] = Random_1.initBullet();
-                });
                 var timerFun = setInterval(function () {
                     var time = Timer_1.updateTimer(io, timer, socket, roomName);
                     Timer_1.closeGame(io, socket, time, _this.gameRoom, roomName);
@@ -205,16 +208,15 @@ module.exports = (function () {
                 this.gameRoom[roomName]["gaming"] = true;
             }
         }
-        socket.room = roomName;
-        socket.join(roomName);
     };
     CircleIO.prototype.startGame = function (io, socket, username, roomName) {
+        console.log('startGame', username);
         if (roomName === undefined)
             socket.emit("startGame", "you are not in any room");
         else {
             if (this.gameRoom[roomName]["isTutorial"]) {
                 this.initGame(io, socket, roomName);
-                io.sockets["in"](roomName).emit('startGame', this.gameRoom[roomName]["players"]);
+                io.sockets.to(roomName).emit('startGame', this.gameRoom[roomName]["players"]);
                 Timer_1.updateTimer(io, this.gameRoom[roomName]["timer"], socket, roomName);
                 Problem_1.initProblem(this.gameRoom, roomName);
                 Problem_1.emitProblem(io, roomName, socket, this.gameRoom[roomName]["problem"]);
@@ -232,11 +234,9 @@ module.exports = (function () {
             }
             else {
                 this.gameRoom[roomName]["players"][username]["ready"] = true;
-                socket.room = roomName;
-                socket.join(roomName);
                 if (Tool_1.allUserReady(this.gameRoom[roomName]["players"])) {
                     this.initGame(io, socket, roomName);
-                    io.sockets["in"](roomName).emit('startGame', this.gameRoom[roomName]["players"]);
+                    io.sockets.to(roomName).emit('startGame', this.gameRoom[roomName]["players"]);
                     Timer_1.updateTimer(io, this.gameRoom[roomName]["timer"], socket, roomName);
                     Problem_1.initProblem(this.gameRoom, roomName);
                     Problem_1.emitProblem(io, roomName, socket, this.gameRoom[roomName]["problem"]);
@@ -267,7 +267,7 @@ module.exports = (function () {
         else if (team === 2) {
             currentScore = this.gameRoom[roomName]["greenPoint"] = this.gameRoom[roomName]["greenPoint"] + score;
         }
-        io.sockets["in"](socket.room).emit('updateScore', {
+        io.sockets.to(socket.room).emit('updateScore', {
             "team": team,
             "score": currentScore
         });
@@ -276,7 +276,7 @@ module.exports = (function () {
         var boardNumber = Random_1.getRandomBoardNumber();
         this.gameRoom[roomName]["boardNumber"] = boardNumber;
         var index = Random_1.getAllIndex();
-        io.sockets["in"](roomName).emit('updateCell', Tool_1.objectToArray({
+        io.sockets.to(roomName).emit('updateCell', Tool_1.objectToArray({
             "index": index,
             "number": this.gameRoom[roomName]["boardNumber"],
             "team": this.gameRoom[roomName]["boardTeam"]
@@ -292,10 +292,10 @@ module.exports = (function () {
             _this.gameRoom[roomName]["boardNumber"][row][col] = number;
             _this.gameRoom[roomName]["boardTeam"][row][col] = team;
         });
-        io.sockets["in"](roomName).emit('updateCell', data);
+        io.sockets.to(roomName).emit('updateCell', data);
     };
     CircleIO.prototype.summary = function (io, socket, roomName) {
-        io.sockets["in"](roomName).emit('summary', {
+        io.sockets.to(roomName).emit('summary', {
             "redScore": this.gameRoom[roomName]["redPoint"],
             "greenScore": this.gameRoom[roomName]["greenPoint"]
         });
@@ -305,10 +305,12 @@ module.exports = (function () {
         var username = data["username"];
         var index = data["index"];
         var value = [];
+        console.log(this.gameRoom[roomName]["players"][username]["bullets"]);
         index.forEach(function (element) {
-            var temp = Random_1.updateBullet(_this.gameRoom[roomName]["players"]["bullets"], index);
+            var temp = Random_1.updateBullet(_this.gameRoom[roomName]["players"][username]["bullets"], element);
             value.push(temp);
         });
+        console.log(this.gameRoom[roomName]["players"][username]["bullets"]);
         socket.emit('updateBullet', {
             "index": index,
             "bullet": value

@@ -6,6 +6,7 @@ const user = {
 
 const room = {
     owner: '',
+    start: false,
     playerCount: [ , 0, 0], // for team 1 and team 2
     playerInfo: {},
 }
@@ -89,29 +90,26 @@ socket.on('joinRoom', (data) => {
             }
         }
     }
-    else {
-        // If I am not in the room, update attendance on room card
-        const attendance = data.roomStatus.redTeamCount + data.roomStatus.greenTeamCount;
-        const room = document.querySelector(`#room_${ data.roomName }`);
-        room.querySelector('.room__brief--attendance')
-            .innerHTML = `( ${ attendance } / 6 )`;
-        // If room has been full, don't let anyone in
-        if(attendance === 2)
-            room.disabled = true;
-    }
+    // Update attendance on room card
+    const attendance = data.roomStatus.redTeamCount + data.roomStatus.greenTeamCount;
+    const roomCard = document.querySelector(`#room_${ data.roomName }`);
+    roomCard.querySelector('.room__brief--attendance')
+        .innerHTML = `( ${ attendance } / 6 )`;
+    // If room has been full, don't let anyone in
+    if(attendance === 2)
+        roomCard.disabled = true;
 });
 
 socket.on('leaveRoom', (data) => {
     // When someone leave some room
 
     if(isInRoom(data.roomName)){
-        // If I am in room, update room information
-        room.playerCount[1] = data.roomStatus.redTeamCount;
-        room.playerCount[2] = data.roomStatus.greenTeamCount;
-        room.playerInfo = data.roomStatus.players;
-
         const leavedPlayerName = data.leavedPlayer;
         if(leavedPlayerName === user.name){
+            room.owner = '';
+            room.playerCount[1] = 0;
+            room.playerCount[2] = 0;
+            room.playerInfo = {};
             // If I am the leaving player, remove all content in room panel
             const players = Array.from(document.querySelectorAll('.datails__team--player'));
             players.forEach(player => {
@@ -120,21 +118,26 @@ socket.on('leaveRoom', (data) => {
             document.querySelector('.main__details').style.display = 'none';
         }
         else{
+            room.playerCount[1] = data.roomStatus.redTeamCount;
+            room.playerCount[2] = data.roomStatus.greenTeamCount;
+            room.playerInfo = data.roomStatus.players;
             // If I am not the leaving player, just remove the leaving one's container
             const leavedPlayer = document.querySelector(`#user_${ leavedPlayerName }`);
             leavedPlayer.parentNode.removeChild(leavedPlayer);
+            if(isOwner(room.owner) && (room.playerCount[1] < 1 || room.playerCount[2] < 1)){
+                document.querySelector('.datails__button--start').disabled = true;
+            }
+
         }
     }
-    else {
-        // If I am not in the room, update attendance on room card
-        const attendance = data.roomStatus.redTeamCount + data.roomStatus.greenTeamCount;
-        const room = document.querySelector(`#room_${ data.roomName }`);
-        room.querySelector('.room__brief--attendance')
-            .innerHTML = `( ${ attendance } / 6 )`;
-        // If room is locked, unlock it
-        if(room.disabled)
-            room.disabled = false;
-    }
+    // Update attendance on room card
+    const attendance = data.roomStatus.redTeamCount + data.roomStatus.greenTeamCount;
+    const roomCard = document.querySelector(`#room_${ data.roomName }`);
+    roomCard.querySelector('.room__brief--attendance')
+        .innerHTML = `( ${ attendance } / 6 )`;
+    // If room is locked, unlock it
+    if(roomCard.disabled)
+        roomCard.disabled = false;
 });
 
 socket.on('closeRoom', (data) => {
@@ -165,19 +168,20 @@ socket.on('closeRoom', (data) => {
 socket.on('enterGame', (data) => {
     // When some room start gaming
     if(isInRoom(data.roomName)){
+        room.start = true;
         // If I am in the room, redirect to route `/game`
-        window.location.href = `/game/${ room.owner }`;
+        window.location.href = `/game/${ data.roomName }`;
     }
     else{
         // If I am not in the room, disable the room card and show it's playing
-        const room = document.querySelector(`#room_${ data.roomName }`);
-        room.querySelector('.room__brief--attendance').innerHTML = `( playing )`;
-        room.disabled = true;
+        const roomCard = document.querySelector(`#room_${ data.roomName }`);
+        roomCard.querySelector('.room__brief--attendance').innerHTML = `( playing )`;
+        roomCard.disabled = true;
     }
 })
 
 function createRoom(){
-    socket.emit('createRoom', user.name,false);
+    socket.emit('createRoom', user.name, false);
 }
 
 function joinRoom(roomName){
@@ -252,3 +256,9 @@ function isOwner(roomOwner){
 function isInRoom(roomName){
     return room.owner === roomName;
 }
+
+window.addEventListener('beforeunload', () => {
+    if(room.owner !== '' && !room.start){
+        leaveRoom();
+    }
+});

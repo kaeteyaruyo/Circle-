@@ -140,7 +140,7 @@ function createStage(width, height, createBullet){
                 cell.collision(bullet.number, bullet.team);
                 socket.emit('updateBullet', roomname, {
                     username,
-                    index: bullet.bulletIndex,
+                    index: [bullet.bulletIndex],
                 });
                 bullet.destroy();
             }
@@ -160,7 +160,7 @@ function createStage(width, height, createBullet){
                     }
                     socket.emit('updateBullet', roomname, {
                         username,
-                        index: bullet.bulletIndex,
+                        index: [bullet.bulletIndex],
                     });
                     bullet.destroy();
                 }
