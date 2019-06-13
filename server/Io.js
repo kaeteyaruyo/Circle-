@@ -319,9 +319,11 @@ module.exports = (function () {
         });
     };
     CircleIO.prototype.summary = function (io, socket, roomName) {
-        if (this.gameRoom[roomName]["redPoint"] !== undefined && this.gameRoom[roomName]["greenPoint"] !== undefined) {
-            this.Rp = this.gameRoom[roomName]["redPoint"];
-            this.Gp = this.gameRoom[roomName]["greenPoint"];
+        if (this.gameRoom[roomName] !== undefined) {
+            if (this.gameRoom[roomName]["redPoint"] !== undefined && this.gameRoom[roomName]["greenPoint"] !== undefined) {
+                this.Rp = this.gameRoom[roomName]["redPoint"];
+                this.Gp = this.gameRoom[roomName]["greenPoint"];
+            }
         }
         socket.emit('summary', {
             "roomName": roomName,
