@@ -142,6 +142,9 @@ function createCell({ row, column, number }){
                 if(neighborCell.owner === cell.owner){
                     neighbors.push(n);
                 }
+                else{
+                    bundleTable.set(neighborCell.id(), null);
+                }
             });
 
             bundleTable.set(cell.id(), cell.id());

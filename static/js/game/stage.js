@@ -134,7 +134,6 @@ function createStage({width, height, username, roomname, socket}){
                 },
                 true
             );
-            console.log(bullet.number)
             if(bullet.number === 13){
                 // Only magic ball could ignore cell's owner
                 cell.collision(bullet.number, bullet.team);

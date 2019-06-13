@@ -5,7 +5,7 @@ append stylesheets
 
 append content
   form.main__username( action = '/', method = 'post' )
-    input.main__username--text( type = 'text', name = 'username', placeholder = 'Enter your name', pattern = "[^(\\\\ \\\^ \\\$ \\\* \\\+ \\\? \\\. \\\( \\\) \\\| \\\{ \\\} \\\[ \\\])]*", autocomplete = 'off', required, autofocus )
+    input.main__username--text( type = 'text', name = 'username', placeholder = 'Enter your name', pattern = "[^(\\\\ \\\^ \\\$ \\\* \\\+ \\\? \\\. \\\( \\\) \\\| \\\{ \\\} \\\[ \\\] \\\' \\\""')]*", autocomplete = 'off', required, autofocus )
     button.main__username--submit( type = 'submit' )
       i.fas.fa-arrow-right
 
