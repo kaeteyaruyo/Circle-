@@ -58,6 +58,9 @@ module.exports = (function () {
             socket.on('getBullet', function (roomName, username) {
                 _this.getBullet(io, socket, roomName, username);
             });
+            socket.on('summary', function (roomName) {
+                _this.summary(io, socket, roomName);
+            });
         });
     };
     CircleIO.prototype.createRoom = function (io, socket, username, isTutorial) {
