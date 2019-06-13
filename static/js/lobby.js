@@ -127,7 +127,6 @@ socket.on('leaveRoom', (data) => {
             if(isOwner(room.owner) && (room.playerCount[1] < 1 || room.playerCount[2] < 1)){
                 document.querySelector('.datails__button--start').disabled = true;
             }
-
         }
     }
     // Update attendance on room card

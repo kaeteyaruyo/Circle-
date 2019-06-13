@@ -12,6 +12,7 @@ let nodeRadius = null;
 let shapeLayer = null;
 let socket = null;
 let currentQuiz = '';
+const cellMap = [];
 
 function passGlobalVariableToCell({
     user_name,
@@ -200,6 +201,7 @@ function createCell({ row, column, number }){
         cell.consume();
     });
 
+    // cellMap[cell.row][cell.column] = cell;
     return cell;
 }
 
