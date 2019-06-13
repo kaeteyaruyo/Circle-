@@ -398,6 +398,10 @@ module.exports = class CircleIO{
             "redScore" : this.Rp,
             "greenScore" : this.Gp
         });
+        io.sockets.emit('closeRoom',{
+            "roomName" : roomName,
+            "roomStatus" : {}
+        });
         delete this.gameRoom[roomName];
     }
 
