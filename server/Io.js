@@ -319,12 +319,14 @@ module.exports = (function () {
         });
     };
     CircleIO.prototype.summary = function (io, socket, roomName) {
-        var Rp = this.gameRoom[roomName]["redPoint"];
-        var Gp = this.gameRoom[roomName]["greenPoint"];
-        io.sockets.emit('summary', {
+        if (this.gameRoom[roomName]["redPoint"] !== undefined && this.gameRoom[roomName]["greenPoint"] !== undefined) {
+            this.Rp = this.gameRoom[roomName]["redPoint"];
+            this.Gp = this.gameRoom[roomName]["greenPoint"];
+        }
+        socket.emit('summary', {
             "roomName": roomName,
-            "redScore": Rp,
-            "greenScore": Gp
+            "redScore": this.Rp,
+            "greenScore": this.Gp
         });
     };
     CircleIO.prototype.updateBullet = function (io, socket, roomName, data) {
