@@ -45,7 +45,7 @@ function getRandomBoardNumber(){
         let maxColumn = (7 - Math.abs(row - 3));
         let temp = [];
         for(let column = 0; column < maxColumn; ++column){
-            temp.push(getRangeRandom(0,99));
+            temp.push(getRangeRandom(1,100));
         }
         result.push(temp);
     }

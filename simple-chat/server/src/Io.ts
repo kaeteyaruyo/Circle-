@@ -396,6 +396,7 @@ module.exports = class CircleIO{
             "redScore" : this.Rp,
             "greenScore" : this.Gp
         });
+        delete this.gameRoom[roomName];
     }
 
     protected updateBullet(io,socket,roomName,data){
