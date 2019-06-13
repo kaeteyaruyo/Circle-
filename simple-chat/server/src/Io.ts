@@ -104,6 +104,10 @@ module.exports = class CircleIO{
             socket.on('getBullet',(roomName,username)=>{
                 this.getBullet(io,socket,roomName,username);
             })
+
+            socket.on('summary',(roomName)=>{
+                this.summary(io,socket,roomName);
+            })
         });
     }
 
