@@ -59,7 +59,6 @@ socket.on('updateScore', (res) => {
 });
 
 socket.on('updateCell', (res) => {
-    console.log(res)
     if(isInRoom(res.roomName)){
         res.data.forEach(cellInfo => {
             const cell = shapeLayer.findOne(`#cell${ cellInfo.index[0] }_${ cellInfo.index[1] }`);
@@ -79,6 +78,7 @@ socket.on('updateCell', (res) => {
 });
 
 socket.on('updateBullet', (res) => {
+    console.log(res)
     res.forEach(bulletInfo => {
         shapeLayer.add(createBullet({
             index: bulletInfo.index,
