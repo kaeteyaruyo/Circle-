@@ -392,11 +392,6 @@ module.exports = class CircleIO{
             "redScore" : Rp,
             "greenScore" : Gp
         });
-        io.sockets.emit('closeRoom',{
-            "roomName" : roomName,
-            "roomStatus" : {}
-        });
-        this.closeRoom(io,socket,roomName);
     }
 
     protected updateBullet(io,socket,roomName,data){

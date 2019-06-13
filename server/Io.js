@@ -326,11 +326,6 @@ module.exports = (function () {
             "redScore": Rp,
             "greenScore": Gp
         });
-        io.sockets.emit('closeRoom', {
-            "roomName": roomName,
-            "roomStatus": {}
-        });
-        this.closeRoom(io, socket, roomName);
     };
     CircleIO.prototype.updateBullet = function (io, socket, roomName, data) {
         var _this = this;
