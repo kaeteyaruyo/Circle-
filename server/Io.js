@@ -309,9 +309,12 @@ module.exports = (function () {
             var col = element["index"][1];
             var number = element["number"];
             var team = element["team"];
-            _this.gameRoom[roomName]["boardNumber"][row][col] = number;
+            _this.gameRoom[roomName]["boardNumber"][row][col] = number % 100;
             _this.gameRoom[roomName]["boardTeam"][row][col] = team;
         });
+        for (var i = 0; i < data.length; i++) {
+            data[i]["number"] = data[i]["number"] % 100;
+        }
         io.sockets.emit('updateCell', {
             "roomName": roomName,
             data: data

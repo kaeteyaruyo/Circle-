@@ -376,9 +376,13 @@ module.exports = class CircleIO{
             let col = element["index"][1];
             let number = element["number"];
             let team = element["team"];
-            this.gameRoom[roomName]["boardNumber"][row][col] = number;
+            this.gameRoom[roomName]["boardNumber"][row][col] = number % 100;
             this.gameRoom[roomName]["boardTeam"][row][col] = team;
         });
+
+        for(let i=0;i<data.length;i++){
+            data[i]["number"] = data[i]["number"] % 100;
+        }
         io.sockets.emit('updateCell',{
             "roomName" : roomName,
             data : data
