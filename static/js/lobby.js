@@ -85,7 +85,7 @@ socket.on('joinRoom', (data) => {
             document.querySelector(`.datails__team${ room.playerInfo[joinedPlayerName].team }--players`)
                 .insertAdjacentHTML('beforeend', generatePlayerHTML(room.playerInfo[joinedPlayerName].team, joinedPlayerName));
             // If I am the room owner, check number of player to decied whether to start game
-            if(isOwner(room.owner) && room.playerCount[1] === 1 && room.playerCount[2] === 1){
+            if(isOwner(room.owner) && room.playerCount[1] === 3 && room.playerCount[2] === 3){
                 document.querySelector('.datails__button--start').disabled = false;
             }
         }
@@ -96,7 +96,7 @@ socket.on('joinRoom', (data) => {
     roomCard.querySelector('.room__brief--attendance')
         .innerHTML = `( ${ attendance } / 6 )`;
     // If room has been full, don't let anyone in
-    if(attendance === 2)
+    if(attendance === 6)
         roomCard.disabled = true;
 });
 
