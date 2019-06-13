@@ -1,0 +1,10 @@
+{
+    "compilerOptions": {
+        "removeComments": true,
+        //"outDir": "./dst",
+        "outDir": "../../server",
+    },
+    "include": [
+        "src/*"
+    ]
+}

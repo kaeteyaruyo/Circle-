@@ -1,0 +1,31 @@
+.main__content {
+    display: grid;
+    grid-template-rows: 10vh min-content;
+    grid-template-areas:
+        '.'
+        'input';
+    justify-content: center;
+    width: 100%;
+}
+
+.main__username {
+    grid-area: input;
+    font-size: 1rem;
+    border: #38595E 2px solid;
+    border-radius: 2rem;
+}
+
+.main__username--text {
+    background-color: transparent;
+    padding: .8rem .5rem .8rem 1rem;
+}
+
+.main__username--submit {
+    background-color: transparent;
+    padding: .8rem 1rem .8rem .5rem;
+    cursor: pointer;
+}
+
+.fa-arrow-right:before {
+    color: #38595E;
+}

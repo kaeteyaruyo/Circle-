@@ -1,0 +1,119 @@
+.main__content {
+    width: 100%;
+    display: grid;
+    grid-template-rows: min-content auto;
+    grid-template-areas:
+    'scoreboard'
+    'canvas';
+}
+
+.main__scoreboard {
+    grid-area: scoreboard;
+    max-height: 16vh;
+    display: grid;
+    grid-template-columns: 1fr 2fr 1fr;
+    grid-template-rows: min-content min-content;
+    grid-template-areas:
+    'score_label quiz_label timer_label'
+    'score quiz timer';
+    justify-items: center;
+    justify-content: center;
+    padding: .3rem 0 1.2rem;
+    background: #E3E4E5;
+    color: #38595E;
+}
+
+.main__scoreboard--label {
+    padding: .5rem 0;
+    font-weight: bold;
+    font-size: 1.2rem;
+}
+
+.main__scoreboard--scoreLabel {
+    grid-area: score_label;
+}
+
+.main__scoreboard--quizLabel {
+    grid-area: quiz_label;
+}
+
+.main__scoreboard--timerLabel {
+    grid-area: timer_label;
+}
+
+.main__scoreboard--data {
+    background: #D5D6D8;
+    box-shadow: 0 3px 5px #A0A2A7;
+    margin: 0 1rem;
+    font-size: 2rem;
+}
+
+.main__scoreboard--score {
+    grid-area: score;
+    width: 9rem;
+}
+
+.main__scoreboard--quiz {
+    grid-area: quiz;
+    width: 15rem;
+}
+
+.main__scoreboard--timer {
+    grid-area: timer;
+    width: 6rem;
+}
+
+#main__canvas {
+    grid-area: canvas;
+}
+
+.main__timesup {
+    z-index: 1;
+    display: none;
+    width: 100vw;
+    height: 100vh;
+    padding-top: 40vh;
+    position: fixed;
+    left: 0;
+    top: 0;
+    overflow: auto;
+    background: transparent;
+}
+
+.main__timesup--container {
+    width: 90vw;
+    margin: 0 auto;
+    padding: 1rem;
+    background: #F6F7F8;
+    border: #38595E 3px inset;
+    font-size: 3rem;
+    font-weight: bolder;
+}
+
+@media only screen and (max-width: 600px) {
+    .main__scoreboard {
+        max-height: 26vh;
+        grid-template-columns: 1fr 1fr;
+        grid-template-rows: min-content min-content min-content min-content;
+        grid-template-areas:
+        'score_label timer_label'
+        'score timer'
+        'quiz_label quiz_label'
+        'quiz quiz';
+    }
+
+    .main__scoreboard--score {
+        grid-area: score;
+        width: 9rem;
+    }
+
+    .main__scoreboard--quiz {
+        grid-area: quiz;
+        width: 15rem;
+    }
+
+    .main__scoreboard--timer {
+        grid-area: timer;
+        width: 6rem;
+    }
+}

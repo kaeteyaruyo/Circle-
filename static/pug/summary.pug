@@ -1,0 +1,16 @@
+extends /base.pug
+
+append stylesheets
+  link( rel = 'stylesheet', href = `/css/summary.css`)
+
+append content
+  section.main__summary
+    p.main__summary--title( align = 'center' ) Summary
+    p.main__score.main__score--team1( align = 'center' )
+    p.main__score.main__score--team2( align = 'center' )
+    p.main__winner( align = 'center' )
+    button.main__ok ok
+
+append scripts
+  script( src = '/socket.io/socket.io.js' )
+  script( src = `/js/summary.js` )
