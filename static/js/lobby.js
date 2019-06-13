@@ -124,7 +124,7 @@ socket.on('leaveRoom', (data) => {
             // If I am not the leaving player, just remove the leaving one's container
             const leavedPlayer = document.querySelector(`#user_${ leavedPlayerName }`);
             leavedPlayer.parentNode.removeChild(leavedPlayer);
-            if(isOwner(room.owner) && (room.playerCount[1] < 1 || room.playerCount[2] < 1)){
+            if(isOwner(room.owner) && (room.playerCount[1] < 3 || room.playerCount[2] < 3)){
                 document.querySelector('.datails__button--start').disabled = true;
             }
         }
@@ -142,7 +142,8 @@ socket.on('leaveRoom', (data) => {
 socket.on('closeRoom', (data) => {
     // When some one close a room, remove room card
     const targetRoom = document.querySelector(`#room_${ data.roomName }`);
-    targetRoom.parentNode.removeChild(targetRoom);
+    if(targetRoom)
+        targetRoom.parentNode.removeChild(targetRoom);
 
     if(isInRoom(data.roomName)){
         // If I am in room, clear room information
