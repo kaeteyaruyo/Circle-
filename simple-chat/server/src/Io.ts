@@ -36,6 +36,8 @@ module.exports = class CircleIO{
     protected gameRoom;
     protected roomCount;
     protected tutorialRoom;
+    protected Rp;
+    protected Gp;
 
     constructor(){
         this.gameRoom = {};
@@ -385,18 +387,15 @@ module.exports = class CircleIO{
     }
 
     protected summary(io,socket,roomName){
-        let Rp = this.gameRoom[roomName]["redPoint"];
-        let Gp = this.gameRoom[roomName]["greenPoint"];
-        io.sockets.emit('summary',{
+        if(this.gameRoom[roomName]["redPoint"] !== undefined && this.gameRoom[roomName]["greenPoint"] !== undefined){
+            this.Rp = this.gameRoom[roomName]["redPoint"];
+            this.Gp = this.gameRoom[roomName]["greenPoint"];
+        }
+        socket.emit('summary',{
             "roomName" : roomName,
-            "redScore" : Rp,
-            "greenScore" : Gp
+            "redScore" : this.Rp,
+            "greenScore" : this.Gp
         });
-        io.sockets.emit('closeRoom',{
-            "roomName" : roomName,
-            "roomStatus" : {}
-        });
-        this.closeRoom(io,socket,roomName);
     }
 
     protected updateBullet(io,socket,roomName,data){
