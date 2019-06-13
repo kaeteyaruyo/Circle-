@@ -385,14 +385,16 @@ module.exports = class CircleIO{
     }
 
     protected summary(io,socket,roomName){
+        let Rp = this.gameRoom[roomName]["redPoint"];
+        let Gp = this.gameRoom[roomName]["greenPoint"]
         io.sockets.emit('summary',{
             "roomName" : roomName,
-            "redScore" : this.gameRoom[roomName]["redPoint"],
-            "greenScore" : this.gameRoom[roomName]["greenPoint"]
+            "redScore" : Rp,
+            "greenScore" : Gp
         });
         io.sockets.emit('closeRoom',{
             "roomName" : roomName,
-            "roomStatus" : this.gameRoom[roomName]
+            "roomStatus" : {}
         });
         delete this.gameRoom[roomName];
     }
