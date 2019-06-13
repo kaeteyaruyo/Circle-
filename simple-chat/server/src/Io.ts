@@ -127,10 +127,12 @@ module.exports = class CircleIO{
             this.gameRoom[username]["greenPoint"] = 0;
             this.gameRoom[username]["isTutorial"] = isTutorial;
             if(isTutorial){
+                let bullets = [];
+                bullets.push(getRangeRandom(0,14));
                  this.gameRoom[username]["players"][username] = {
                      "team" : 1,
                      "ready" : false,
-                     "bullets" : [0,0,0,0,0]
+                     "bullets" : bullets
                  };
                 this.gameRoom[username]["redTeamCount"] = 1;
             }
@@ -168,10 +170,12 @@ module.exports = class CircleIO{
                 team = 1;
                 thisRoom["redTeamCount"] = thisRoom["redTeamCount"] + 1;
             }
+            let bullets = [];
+            bullets.push(getRangeRandom(0,14));
             thisRoom["players"][username] = {
                 "team" : team,
                 "ready" : false,
-                "bullets" : [0,0,0,0,0]
+                "bullets" : bullets
             };
             io.sockets.emit('joinRoom',{
                 "joinedPlayer": username,
@@ -346,10 +350,10 @@ module.exports = class CircleIO{
             "number" : num_flat,
             "team" : team_flat, // score of my team
         });
-        for(let i=0;i<arr.length;i++){
-            arr[i].roomName= roomName;
-        }
-        io.sockets.emit('updateCell',arr);
+        io.sockets.emit('updateCell',{
+            data: arr,
+            roomName : roomName
+        });
     }
 
     protected updateCell(io,socket,roomName, data){
@@ -387,6 +391,7 @@ module.exports = class CircleIO{
             "index" : index,
             "bullet" : value
         }));
+        console.log(value)
     }
 
     protected getBullet(io,socket,roomName,username){

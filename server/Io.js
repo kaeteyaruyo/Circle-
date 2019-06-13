@@ -76,10 +76,12 @@ module.exports = (function () {
             this.gameRoom[username]["greenPoint"] = 0;
             this.gameRoom[username]["isTutorial"] = isTutorial;
             if (isTutorial) {
+                var bullets = [];
+                bullets.push(Random_1.getRangeRandom(0, 14));
                 this.gameRoom[username]["players"][username] = {
                     "team": 1,
                     "ready": false,
-                    "bullets": [0, 0, 0, 0, 0]
+                    "bullets": bullets
                 };
                 this.gameRoom[username]["redTeamCount"] = 1;
             }
@@ -113,10 +115,12 @@ module.exports = (function () {
                 team = 1;
                 thisRoom["redTeamCount"] = thisRoom["redTeamCount"] + 1;
             }
+            var bullets = [];
+            bullets.push(Random_1.getRangeRandom(0, 14));
             thisRoom["players"][username] = {
                 "team": team,
                 "ready": false,
-                "bullets": [0, 0, 0, 0, 0]
+                "bullets": bullets
             };
             io.sockets.emit('joinRoom', {
                 "joinedPlayer": username,
@@ -282,10 +286,10 @@ module.exports = (function () {
             "number": num_flat,
             "team": team_flat
         });
-        for (var i = 0; i < arr.length; i++) {
-            arr[i].roomName = roomName;
-        }
-        io.sockets.emit('updateCell', arr);
+        io.sockets.emit('updateCell', {
+            data: arr,
+            roomName: roomName
+        });
     };
     CircleIO.prototype.updateCell = function (io, socket, roomName, data) {
         var _this = this;
@@ -322,6 +326,7 @@ module.exports = (function () {
             "index": index,
             "bullet": value
         }));
+        console.log(value);
     };
     CircleIO.prototype.getBullet = function (io, socket, roomName, username) {
         socket.emit('updateBullet', Tool_1.objectToArray({

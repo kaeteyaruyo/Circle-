@@ -69,10 +69,12 @@ function initBullet(){
 }
 
 function updateBullet(Bullet,index){
-    let value = getRangeRandom(0,14);
+    let value = getRangeRandom(0,10);
     if(value === 0){
-        value = getRangeRandom(10,14);
+        let temp = getRangeRandom(0,3);
+        value = [10,11,12,13][temp];
     }
+    console.log(value);
     Bullet[index] = value;
     return value
 }
