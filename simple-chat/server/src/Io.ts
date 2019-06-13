@@ -386,7 +386,7 @@ module.exports = class CircleIO{
 
     protected summary(io,socket,roomName){
         let Rp = this.gameRoom[roomName]["redPoint"];
-        let Gp = this.gameRoom[roomName]["greenPoint"]
+        let Gp = this.gameRoom[roomName]["greenPoint"];
         io.sockets.emit('summary',{
             "roomName" : roomName,
             "redScore" : Rp,
@@ -396,7 +396,7 @@ module.exports = class CircleIO{
             "roomName" : roomName,
             "roomStatus" : {}
         });
-        delete this.gameRoom[roomName];
+        this.closeRoom(io,socket,roomName);
     }
 
     protected updateBullet(io,socket,roomName,data){

@@ -330,7 +330,7 @@ module.exports = (function () {
             "roomName": roomName,
             "roomStatus": {}
         });
-        delete this.gameRoom[roomName];
+        this.closeRoom(io, socket, roomName);
     };
     CircleIO.prototype.updateBullet = function (io, socket, roomName, data) {
         var _this = this;
