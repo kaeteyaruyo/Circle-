@@ -188,7 +188,6 @@ module.exports = (function () {
         this.gameRoom[roomName]["players"][username]["ready"] = false;
     };
     CircleIO.prototype.enterGame = function (io, socket, roomName) {
-        console.log("enterGame");
         io.sockets.emit('enterGame', {
             "roomName": roomName
         });
@@ -351,7 +350,6 @@ module.exports = (function () {
         }));
     };
     CircleIO.prototype.getBullet = function (io, socket, roomName, username) {
-        console.log(this.gameRoom[roomName]["players"][username]["bullets"]);
         socket.emit('updateBullet', Tool_1.objectToArray({
             "index": [0, 1, 2, 3, 4],
             "bullet": this.gameRoom[roomName]["players"][username]["bullets"]

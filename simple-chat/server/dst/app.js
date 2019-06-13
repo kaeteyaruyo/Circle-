@@ -25,5 +25,5 @@ setInterval(function () {
 }, 3000);
 Io_1.createIo(io);
 http.listen(3000, function () {
-    console.log('Example app listening on port 3000!');
+    
 });
