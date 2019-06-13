@@ -12,7 +12,7 @@ let nodeRadius = null;
 let shapeLayer = null;
 let socket = null;
 let currentQuiz = '';
-const cellMap = [];
+const cellMap = [[],[],[],[],[],[],[]];
 
 function passGlobalVariableToCell({
     user_name,
@@ -92,7 +92,7 @@ function createCell({ row, column, number }){
             // If it was a bomb
             const victims = [];
             cell.neighbor.forEach(n => {
-                const neighborCell = shapeLayer.findOne(`#${ n }`);
+                const neighborCell = cellMap[n[0]][n[1]];
                 victims.push({
                     index: [neighborCell.row, neighborCell.column],
                     number: neighborCell.number,
@@ -135,34 +135,11 @@ function createCell({ row, column, number }){
         label.offsetY(label.height() / 2);
 
         shapeLayer.draw();
-        if(cell.owner !== 0){
-            // Search for bundle
-            const neighbors = [];
-            cell.neighbor.forEach(n => {
-                const neighborCell = shapeLayer.findOne(`#${ n }`);
-                if(neighborCell.owner === cell.owner){
-                    neighbors.push(n);
-                }
-                else{
-                    bundleTable.set(neighborCell.id(), null);
-                }
-            });
-
-            bundleTable.set(cell.id(), cell.id());
-            neighbors.forEach(n => {
-                const root = findRoot(n)
-                bundleTable.set(root, cell.id());
-            });
-        }
-        else {
-            bundleTable.set(cell.id(), null);
-        }
     }
 
     cell.consume = () => {
         if(cell.owner === userteam){
-            const root = findRoot(cell.id());
-            const bundle = collectBundle(root).concat(root);
+            const bundle = collectBundle(cell.id());
             const bonus = bundle.length;
             let totalNumber = 0;
 
@@ -172,7 +149,7 @@ function createCell({ row, column, number }){
                 totalNumber += c.number
                 victims.push({
                     index: [c.row, c.column],
-                    number: randomInt(100),
+                    number: randomInt(50) + 1,
                     team: 0,
                 });
             });
@@ -201,7 +178,7 @@ function createCell({ row, column, number }){
         cell.consume();
     });
 
-    // cellMap[cell.row][cell.column] = cell;
+    cellMap[cell.row][cell.column] = cell;
     return cell;
 }
 
@@ -220,52 +197,77 @@ function findNeightbor(row, column){
     // Find neighbor in previous column
     if(prevRow >= 0){
         if(row <= 3){
-            if(prevColumn >= 0) n.push(`cell${ prevRow }_${ prevColumn }`);
-            if(column < columnInrow[prevRow]) n.push(`cell${ prevRow }_${ column }`);
+            if(prevColumn >= 0) n.push([prevRow, prevColumn]);
+            if(column < columnInrow[prevRow]) n.push([prevRow, column]);
         }
         else{
-            n.push(`cell${ prevRow }_${ column }`);
-            n.push(`cell${ prevRow }_${ nextColumn }`);
+            n.push([prevRow, column]);
+            n.push([prevRow, nextColumn]);
         }
     }
 
     // Find neighbor in current column
-    if(prevColumn >= 0) n.push(`cell${ row }_${ prevColumn }`);
-    if(nextColumn < columnInrow[row]) n.push(`cell${ row }_${ nextColumn }`);
+    if(prevColumn >= 0) n.push([row, prevColumn]);
+    if(nextColumn < columnInrow[row]) n.push([row, nextColumn]);
 
     // Find neighbor in next column
     if(nextRow < 7){
         if(row < 3){
-            n.push(`cell${ nextRow }_${ column }`);
-            n.push(`cell${ nextRow }_${ nextColumn }`);
+            n.push([nextRow, column]);
+            n.push([nextRow, nextColumn]);
         }
         else{
-            if(prevColumn >= 0) n.push(`cell${ nextRow }_${ prevColumn }`);
-            if(column < columnInrow[nextRow]) n.push(`cell${ nextRow }_${ column }`);
+            if(prevColumn >= 0) n.push([nextRow, prevColumn]);
+            if(column < columnInrow[nextRow]) n.push([nextRow, column]);
         }
     }
     return n;
 }
 
-function collectBundle(cellName){
-    const children = [];
-    bundleTable.forEach((val, key) => {
-        if(key !== cellName && val === cellName)
-            children.push(key);
-    });
-    let grandson = [];
-    children.forEach(c => {
-        grandson = grandson.concat(collectBundle(c));
-    })
-    return children.concat(grandson);
+function findBundle(){
+    const traveled = [
+        [false, false, false, false, ],
+        [false, false, false, false, false, ],
+        [false, false, false, false, false, false, ],
+        [false, false, false, false, false, false, false, ],
+        [false, false, false, false, false, false, ],
+        [false, false, false, false, false, ],
+        [false, false, false, false, ],
+    ]
+    let bundleIndex = 1;
+
+    for(let row = 0; row < 7; ++row){
+        let maxColumn = (7 - Math.abs(row - 3));
+        for(let column = 0; column < maxColumn; ++column){
+            dfs(row, column, bundleIndex, traveled);
+            ++bundleIndex;
+        }
+    }
 }
 
-function findRoot(cellName){
-    const parent = bundleTable.get(cellName)
-    if(parent == cellName)
-        return cellName;
+function dfs(row, column, index, traveled){
+    if(traveled[row][column]) return;
+    traveled[row][column] = true;
+
+    const cell = cellMap[row][column];
+    if(cell.owner === userteam){
+        bundleTable.set(cell.id(), index);
+        cell.neighbor.forEach( n => {
+            dfs(n[0], n[1], index, traveled);
+        })
+    }
     else
-        return findRoot(parent);
+        bundleTable.set(cell.id(), null);
+}
+
+function collectBundle(cellName){
+    const bundleIndex = bundleTable.get(cellName);
+    const bundle = [];
+    bundleTable.forEach((val, key) => {
+        if(val === bundleIndex)
+            bundle.push(key)
+    })
+    return bundle;
 }
 
 // Generate random integer in 0 - (max - 1)
@@ -274,7 +276,7 @@ function randomInt(max) {
 }
 
 function isSquare(x){
-    return [1, 4, 9, 16, 25, 36, 49, 64, 81].includes(x);
+    return [1, 4, 9, 16, 25, 36, 49, 64, 81, 100, 121, 144, ].includes(x);
 }
 
 function isPrime(x){
@@ -289,4 +291,4 @@ function isPower2(x){
     return [1, 2, 4, 8, 16, 32, 64].includes(x);
 }
 
-export { passGlobalVariableToCell, createCell, cellUpdateQuiz };
+export { passGlobalVariableToCell, createCell, cellUpdateQuiz, findBundle };

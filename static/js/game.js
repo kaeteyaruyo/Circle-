@@ -1,5 +1,5 @@
 import { createStage, } from '/js/game/stage.js'
-import { passGlobalVariableToCell, createCell, cellUpdateQuiz } from '/js/game/cell.js'
+import { passGlobalVariableToCell, createCell, cellUpdateQuiz, findBundle } from '/js/game/cell.js'
 import { passGlobalVariableToBullet, createBullet } from '/js/game/bullet.js'
 
 let team = 0;
@@ -74,11 +74,11 @@ socket.on('updateCell', (res) => {
             }
         });
         shapeLayer.draw();
+        findBundle();
     }
 });
 
 socket.on('updateBullet', (res) => {
-    
     res.forEach(bulletInfo => {
         shapeLayer.add(createBullet({
             index: bulletInfo.index,

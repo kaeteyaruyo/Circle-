@@ -216,4 +216,7 @@
         'team2'
         'button';
     }
+    .main__details {
+        padding-top: 0;
+    }
 }
