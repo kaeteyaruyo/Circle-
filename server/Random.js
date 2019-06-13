@@ -16,7 +16,7 @@ function getRandomProblem(problems) {
         if (problem === "%") {
             var n = getRangeRandom(0, 100);
             var m = getRangeRandom(0, n);
-            return "x % " + n + " = " + m;
+            return "x % " + n + " == " + m;
         }
         else {
             var n = getRangeRandom(0, 99);

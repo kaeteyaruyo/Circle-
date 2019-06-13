@@ -77,7 +77,9 @@ module.exports = (function () {
             this.gameRoom[username]["isTutorial"] = isTutorial;
             if (isTutorial) {
                 var bullets = [];
-                bullets.push(Random_1.getRangeRandom(0, 14));
+                for (var i = 0; i < 5; i++) {
+                    bullets.push(Random_1.getRangeRandom(0, 14));
+                }
                 this.gameRoom[username]["players"][username] = {
                     "team": 1,
                     "ready": false,
@@ -116,7 +118,9 @@ module.exports = (function () {
                 thisRoom["redTeamCount"] = thisRoom["redTeamCount"] + 1;
             }
             var bullets = [];
-            bullets.push(Random_1.getRangeRandom(0, 14));
+            for (var i = 0; i < 5; i++) {
+                bullets.push(Random_1.getRangeRandom(0, 14));
+            }
             thisRoom["players"][username] = {
                 "team": team,
                 "ready": false,
@@ -274,8 +278,13 @@ module.exports = (function () {
         });
     };
     CircleIO.prototype.shuffleBoard = function (io, socket, roomName) {
-        var boardNumber = Random_1.getRandomBoardNumber();
-        this.gameRoom[roomName]["boardNumber"] = boardNumber;
+        for (var row = 0; row < 7; ++row) {
+            var maxColumn = (7 - Math.abs(row - 3));
+            for (var column = 0; column < maxColumn; ++column) {
+                if (this.gameRoom[roomName]["boardTeam"][row][column] === 0)
+                    this.gameRoom[roomName]["boardNumber"][row][column] = Random_1.getRangeRandom(0, 99);
+            }
+        }
         var index = Random_1.getAllIndex();
         var num = this.gameRoom[roomName]["boardNumber"];
         var num_flat = Tool_1.flatten(num);
@@ -326,9 +335,9 @@ module.exports = (function () {
             "index": index,
             "bullet": value
         }));
-        console.log(value);
     };
     CircleIO.prototype.getBullet = function (io, socket, roomName, username) {
+        console.log(this.gameRoom[roomName]["players"][username]["bullets"]);
         socket.emit('updateBullet', Tool_1.objectToArray({
             "index": [0, 1, 2, 3, 4],
             "bullet": this.gameRoom[roomName]["players"][username]["bullets"]

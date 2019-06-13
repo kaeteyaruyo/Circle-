@@ -3,7 +3,7 @@ exports.__esModule = true;
 function updateTimer(io, Timer, socket, roomName) {
     var now = new Date().getTime();
     var start = Timer.getTime();
-    var passTime = 180 - Math.floor((now - start) / 1000);
+    var passTime = 10 - Math.floor((now - start) / 1000);
     var min = Math.floor(passTime / 60);
     var sec = Math.floor(passTime % 60);
     io.sockets.emit('updateTimer', {
@@ -21,17 +21,17 @@ exports.createTimer = createTimer;
 function closeGame(io, socket, time, gameRoom, roomName) {
     if (time <= 0) {
         var summary = gameRoom[roomName];
-        io.sockets.emit('GameOver', {
+        io.sockets.emit('gameOver', {
             "roomName": roomName
         });
-        if (this.gameRoom[roomName] !== undefined) {
+        if (gameRoom[roomName] !== undefined) {
             socket.room = "";
             socket.leave(roomName);
-            var timerFun = this.gameRoom[roomName]["timerFun"];
-            var problemFun = this.gameRoom[roomName]["problemFun"];
+            var timerFun = gameRoom[roomName]["timerFun"];
+            var problemFun = gameRoom[roomName]["problemFun"];
             clearInterval(timerFun);
             clearInterval(problemFun);
-            this.gameRoom[roomName]["gaming"] = false;
+            gameRoom[roomName]["gaming"] = false;
         }
     }
 }

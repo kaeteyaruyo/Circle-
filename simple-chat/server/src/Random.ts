@@ -13,7 +13,7 @@ function getRandomProblem(problems){
         if(problem === "%"){
             let n = getRangeRandom(0,100);
             let m = getRangeRandom(0,n);
-            return `x % ${n} = ${m}`;
+            return `x % ${n} == ${m}`;
         }
         else{
             let n = getRangeRandom(0,99);

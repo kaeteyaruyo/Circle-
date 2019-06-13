@@ -128,7 +128,9 @@ module.exports = class CircleIO{
             this.gameRoom[username]["isTutorial"] = isTutorial;
             if(isTutorial){
                 let bullets = [];
-                bullets.push(getRangeRandom(0,14));
+                for(let i=0;i<5;i++){
+                    bullets.push(getRangeRandom(0,14));
+                }
                  this.gameRoom[username]["players"][username] = {
                      "team" : 1,
                      "ready" : false,
@@ -171,7 +173,9 @@ module.exports = class CircleIO{
                 thisRoom["redTeamCount"] = thisRoom["redTeamCount"] + 1;
             }
             let bullets = [];
-            bullets.push(getRangeRandom(0,14));
+            for(let i=0;i<5;i++){
+                    bullets.push(getRangeRandom(0,14));
+                }
             thisRoom["players"][username] = {
                 "team" : team,
                 "ready" : false,
@@ -338,8 +342,13 @@ module.exports = class CircleIO{
     }
 
     protected shuffleBoard(io,socket,roomName){
-        let boardNumber = getRandomBoardNumber();
-        this.gameRoom[roomName]["boardNumber"] = boardNumber;
+        for(let row = 0; row < 7; ++row){
+            let maxColumn = (7 - Math.abs(row - 3));
+            for(let column = 0; column < maxColumn; ++column){
+                if(this.gameRoom[roomName]["boardTeam"][row][column] === 0)
+                    this.gameRoom[roomName]["boardNumber"][row][column] = getRangeRandom(0,99);
+            }
+        }
         let index = getAllIndex();
         let num  = this.gameRoom[roomName]["boardNumber"];
         let num_flat = flatten(num);
@@ -391,10 +400,10 @@ module.exports = class CircleIO{
             "index" : index,
             "bullet" : value
         }));
-        console.log(value)
     }
 
     protected getBullet(io,socket,roomName,username){
+        console.log(this.gameRoom[roomName]["players"][username]["bullets"]);
         socket.emit('updateBullet',objectToArray({
             "index" : [0,1,2,3,4],
             "bullet" : this.gameRoom[roomName]["players"][username]["bullets"]
