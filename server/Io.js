@@ -324,6 +324,11 @@ module.exports = (function () {
             "redScore": this.gameRoom[roomName]["redPoint"],
             "greenScore": this.gameRoom[roomName]["greenPoint"]
         });
+        io.sockets.emit('closeRoom', {
+            "roomName": roomName,
+            "roomStatus": this.gameRoom[roomName]
+        });
+        delete this.gameRoom[roomName];
     };
     CircleIO.prototype.updateBullet = function (io, socket, roomName, data) {
         var _this = this;
