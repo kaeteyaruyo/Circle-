@@ -78,7 +78,7 @@ socket.on('updateCell', (res) => {
 });
 
 socket.on('updateBullet', (res) => {
-    console.log(res)
+    
     res.forEach(bulletInfo => {
         shapeLayer.add(createBullet({
             index: bulletInfo.index,

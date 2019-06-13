@@ -78,7 +78,6 @@ function updateBullet(Bullet, index) {
         var temp = getRangeRandom(0, 3);
         value = [10, 11, 12, 13][temp];
     }
-    console.log(value);
     Bullet[index] = value;
     return value;
 }

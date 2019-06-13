@@ -162,8 +162,8 @@ module.exports = class CircleIO{
     }
 
     protected joinRoom(io,socket,username,roomName){
-        // console.log(roomName);
-        // console.log(this.gameRoom);
+        // 
+        // 
         socket.room = roomName;
         let thisRoom = this.gameRoom[roomName];
         let joinPerson = username;
@@ -251,7 +251,6 @@ module.exports = class CircleIO{
     }
 
     protected enterGame(io,socket,roomName){
-        console.log("enterGame");
         io.sockets.emit('enterGame',{
             "roomName" : roomName
         });
@@ -271,7 +270,7 @@ module.exports = class CircleIO{
                 this.gameRoom[roomName]["boardTeam"] = initBoardTeam();
                 let timerFun = setInterval(()=>{
                     let time = updateTimer(io,timer,socket,roomName);
-                    //console.log("hi");
+                    //
                     closeGame(io,socket,time,this.gameRoom,roomName);
                 },1000);
                 let problemFun = setInterval(()=>{
@@ -420,7 +419,7 @@ module.exports = class CircleIO{
     }
 
     protected getBullet(io,socket,roomName,username){
-        console.log(this.gameRoom[roomName]["players"][username]["bullets"]);
+        
         socket.emit('updateBullet',objectToArray({
             "index" : [0,1,2,3,4],
             "bullet" : this.gameRoom[roomName]["players"][username]["bullets"]
