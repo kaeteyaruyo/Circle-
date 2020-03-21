@@ -1,39 +1,39 @@
-function getRangeRandom(min,max){
+function RandomInt(min,max){
     return Math.floor(Math.random()*max)+min;
 };
 
 function getRandomProblem(problems){
     let keys = problems['keys'];
-    let indexOfKeys = getRangeRandom(0,2);
+    let indexOfKeys = RandomInt(0,2);
     let problemOfClass = keys[indexOfKeys];
     let problemList = problems[problemOfClass];
     if (problemOfClass === "basic"){
-        let index = getRangeRandom(0,problemList.length)
+        let index = RandomInt(0,problemList.length)
         let problem = problemList[index];
         if(problem === "%"){
-            let n = getRangeRandom(0,100);
-            let m = getRangeRandom(0,n);
+            let n = RandomInt(0,100);
+            let m = RandomInt(0,n);
             return `x % ${n} == ${m}`;
         }
         else{
-            let n = getRangeRandom(0,99);
+            let n = RandomInt(0,99);
             return `x ${problem} ${n}`;
         }
     }
     else if(problemOfClass === "function"){
-        let index = getRangeRandom(0,problemList.length)
+        let index = RandomInt(0,problemList.length)
         let problem = problemList[index];
         return problem;
     }
     else if(problemOfClass === "special"){
-        let index = getRangeRandom(0,problemList.length)
+        let index = RandomInt(0,problemList.length)
         let problem = problemList[index];
         if(problem === "x+2x+1"){
-            let n = getRangeRandom(1,11);
+            let n = RandomInt(1,11);
             return `x+2*x+1 == ${(n+1)*(n+1)}`;
         }
         else if(problem === "x-2x+1"){
-            let n = getRangeRandom(1,11);
+            let n = RandomInt(1,11);
             return `x-2*x+1 == ${(n-1)*(n+1)}`;
         }
     }
@@ -45,7 +45,7 @@ function getRandomBoardNumber(){
         let maxColumn = (7 - Math.abs(row - 3));
         let temp = [];
         for(let column = 0; column < maxColumn; ++column){
-            temp.push(getRangeRandom(1,100));
+            temp.push(RandomInt(1,100));
         }
         result.push(temp);
     }
@@ -65,13 +65,13 @@ function initBoardTeam(){
 }
 
 function initBullet(){
-    return [getRangeRandom(0,13),getRangeRandom(0,13),getRangeRandom(0,13),getRangeRandom(0,13),getRangeRandom(0,13)];
+    return [RandomInt(0,13),RandomInt(0,13),RandomInt(0,13),RandomInt(0,13),RandomInt(0,13)];
 }
 
 function updateBullet(Bullet,index){
-    let value = getRangeRandom(0,10);
+    let value = RandomInt(0,10);
     if(value === 0){
-        let temp = getRangeRandom(0,3);
+        let temp = RandomInt(0,3);
         value = [10,11,12,13][temp];
     }
     
@@ -89,4 +89,4 @@ function getAllIndex(){
     }
     return result;
 }
-export {getRangeRandom , getRandomProblem,getRandomBoardNumber,initBoardTeam,getAllIndex,initBullet,updateBullet}
+export {RandomInt , getRandomProblem,getRandomBoardNumber,initBoardTeam,getAllIndex,initBullet,updateBullet}

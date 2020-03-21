@@ -14,11 +14,12 @@ const stage = createStage({
     socket,
 });
 const shapeLayer = stage.findOne('.shapeLayer');
-
-socket.emit('startGame', username, roomname);
-
+socket.emit('joinGameRoom', roomname);
+socket.on('joinGameRoom', (res)=>{
+    socket.emit('startGame', username, roomname);
+})
 socket.on('startGame', (res) => {
-    if(isInRoom(res.roomName) && res.players[username] !== undefined) {
+    if(res.players[username] !== undefined) {
         team = res.players[username].team;
         passGlobalVariableToCell({
             user_name: username,
@@ -41,41 +42,35 @@ socket.on('startGame', (res) => {
 });
 
 socket.on('updateTimer', (res) => {
-    if(isInRoom(res.roomName)) {
-        stage.updateTimer(`${ res.min }:${ res.sec.toString().padStart(2, '0') }`);
-    }
+    stage.updateTimer(`${ res.min }:${ res.sec.toString().padStart(2, '0') }`);
 });
 
 socket.on('updateQuiz', (res) => {
-    if(isInRoom(res.roomName)){
-        stage.updateQuiz(res.problem);
-        cellUpdateQuiz(res.problem);
-    }
+    stage.updateQuiz(res.problem);
+    cellUpdateQuiz(res.problem);
 });
 
 socket.on('updateScore', (res) => {
-    if(isInRoom(res.roomName) && res.team === team)
+    if(res.team === team)
         stage.updateScore(res.score);
 });
 
 socket.on('updateCell', (res) => {
-    if(isInRoom(res.roomName)){
-        res.data.forEach(cellInfo => {
-            const cell = shapeLayer.findOne(`#cell${ cellInfo.index[0] }_${ cellInfo.index[1] }`);
-            if(cell){
-                cell.update(cellInfo.number, cellInfo.team);
-            }
-            else {
-                shapeLayer.add(createCell({
-                    row: cellInfo.index[0],
-                    column: cellInfo.index[1],
-                    number: cellInfo.number,
-                }));
-            }
-        });
-        shapeLayer.draw();
-        findBundle();
-    }
+    res.data.forEach(cellInfo => {
+        const cell = shapeLayer.findOne(`#cell${ cellInfo.index[0] }_${ cellInfo.index[1] }`);
+        if(cell){
+            cell.update(cellInfo.number, cellInfo.team);
+        }
+        else {
+            shapeLayer.add(createCell({
+                row: cellInfo.index[0],
+                column: cellInfo.index[1],
+                number: cellInfo.number,
+            }));
+        }
+    });
+    shapeLayer.draw();
+    findBundle();
 });
 
 socket.on('updateBullet', (res) => {
