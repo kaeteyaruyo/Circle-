@@ -84,7 +84,7 @@ socket.on('joinRoom', (data) => {
             document.querySelector(`.datails__team${ room.playerInfo[joinedPlayerName].team }--players`)
                 .insertAdjacentHTML('beforeend', generatePlayerHTML(room.playerInfo[joinedPlayerName].team, joinedPlayerName));
             // If I am the room owner, check number of player to decied whether to start game
-            if(isOwner(room.owner) && room.playerCount[1] === 1 && room.playerCount[2] === 1){
+            if(isOwner(room.owner) && room.playerCount[1] === 3 && room.playerCount[2] === 3){
                 document.querySelector('.datails__button--start').disabled = false;
             }
         }
@@ -123,7 +123,7 @@ socket.on('leaveRoom', (data) => {
             // If I am not the leaving player, just remove the leaving one's container
             const leavedPlayer = document.querySelector(`#user_${ leavedPlayerName }`);
             leavedPlayer.parentNode.removeChild(leavedPlayer);
-            if(isOwner(room.owner) && (room.playerCount[1] < 1 || room.playerCount[2] < 1)){
+            if(isOwner(room.owner) && (room.playerCount[1] < 3 || room.playerCount[2] < 3)){
                 document.querySelector('.datails__button--start').disabled = true;
             }
         }
@@ -132,7 +132,7 @@ socket.on('leaveRoom', (data) => {
     const attendance = data.roomStatus.redTeamCount + data.roomStatus.greenTeamCount;
     const roomCard = document.querySelector(`#room_${ data.roomName }`);
     roomCard.querySelector('.room__brief--attendance')
-        .innerHTML = `( ${ attendance } / 2 )`;
+        .innerHTML = `( ${ attendance } / 6 )`;
     // If room is locked, unlock it
     if(roomCard.disabled)
         roomCard.disabled = false;
@@ -239,7 +239,7 @@ function generateRoomHTML(name, attendance){
     return `
     <button class = "main__room main__room--room" id = "room_${ name }">
       <p class = "room__brief room__brief--name">${ name }'s Room</p>
-      <p class = "room__brief room__brief--attendance">( ${ attendance } / 2 )</p>
+      <p class = "room__brief room__brief--attendance">( ${ attendance } / 6 )</p>
     </button>
     `;
 }
