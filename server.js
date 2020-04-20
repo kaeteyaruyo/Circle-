@@ -28,12 +28,12 @@ app.set('views', path.join(config.projectRoot, '/static/pug'));
 
 // Setup session
 app.use( session( {
-    secret: 'rhOo03narefOzYOWfFwinC7uX4aVZYvVVbibZ3nSyQc',
+    secret:            config.cookieSecret,
     name:              'circle++',
     resave:            false,
     saveUninitialized: false,
     cookie:            {
-        // domain:   config.host,
+        domain:   config.host,
         httpOnly: true,
         maxAge: 300 * 60 * 1000, // 300 minutes
     },
@@ -90,4 +90,6 @@ app.get('/summary/:roomName', middleware.renderSetting, middleware.checkLogin, (
     });
 });
 
-server.listen(config.port);
+server.listen(config.port, () => {
+    console.log(`Running on port ${ config.port }`);
+});

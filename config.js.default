@@ -3,6 +3,7 @@ const config = {
     protocol: 'http',
     host: '',
     port: '',
+    cookieSecret: '',
     staticUrl: () => `${ config.protocol }://${ config.host }:${ config.port }`
 }
 
