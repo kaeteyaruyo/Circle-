@@ -1,25 +1,25 @@
-import *  as fs from 'fs';
-import {getRangeRandom , getRandomProblem } from './Random';
-import * as path from 'path';
+import { getRandomProblem } from './Random';
 
 const problems = {
     "keys": ["basic", "function"],
     "basic": ["<", "==", ">", "%"],
     "function": ["isSquare(x)", "isPrime(x)", "inFibonacci(x)", "isPower2(x)"],
 };
+
 function updateProblem(gameRoom,roomName){
-    let problem = getRandomProblem(problems);
-    gameRoom[roomName]["problem"] = problem;
+    gameRoom[roomName]["problem"] = getRandomProblem(problems);
 }
-function emitProblem(io,room,socket,problem){
-    io.sockets.emit('updateQuiz', { 
-        "roomName" : room,
+
+function emitProblem(io, socket, roomName ,problem){
+    io.in(`${roomName}-game`).emit('updateQuiz', { 
         "problem" : problem,
     });
 }
+
 function initProblem(gameRoom,roomName){
     if(gameRoom[roomName]["problem"] === undefined){
         updateProblem(gameRoom,roomName);
     }
 }
+
 export {updateProblem,emitProblem,initProblem}

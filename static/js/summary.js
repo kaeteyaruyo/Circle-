@@ -8,7 +8,10 @@ socket.on('summary', res => {
     if(roomname === res.roomName){
         document.querySelector('.main__score--team1').innerHTML = res.redScore;
         document.querySelector('.main__score--team2').innerHTML = res.greenScore;
-        if(res.redScore >= res.greenScore){
+        if(res.redScore == res.greenScore){
+            document.querySelector('.main__winner').innerHTML = 'Even !!';
+        }
+        else if(res.redScore > res.greenScore){
             document.querySelector('.main__winner').innerHTML = 'Red team win!!';
         }
         else{

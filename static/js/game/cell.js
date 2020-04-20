@@ -154,7 +154,7 @@ function createCell({ row, column, number }){
                 });
             });
             socket.emit('updateCell', roomname, victims);
-            socket.emit('getScore', roomname, userteam, totalNumber * bonus);
+            socket.emit('getScore', roomname, totalNumber * bonus, userteam);
         }
     }
 

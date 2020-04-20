@@ -7,13 +7,11 @@ var problems = {
     "function": ["isSquare(x)", "isPrime(x)", "inFibonacci(x)", "isPower2(x)"]
 };
 function updateProblem(gameRoom, roomName) {
-    var problem = Random_1.getRandomProblem(problems);
-    gameRoom[roomName]["problem"] = problem;
+    gameRoom[roomName]["problem"] = Random_1.getRandomProblem(problems);
 }
 exports.updateProblem = updateProblem;
-function emitProblem(io, room, socket, problem) {
-    io.sockets.emit('updateQuiz', {
-        "roomName": room,
+function emitProblem(io, socket, roomName, problem) {
+    io["in"](roomName + "-game").emit('updateQuiz', {
         "problem": problem
     });
 }

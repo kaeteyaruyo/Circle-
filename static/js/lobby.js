@@ -51,8 +51,7 @@ socket.on('createRoom', (data) => {
 });
 
 socket.on('joinRoom', (data) => {
-    // When someone join some room
-
+// When someone join some room
     if(isInRoom(data.roomName)){
         // If I am in that room, update room information
         room.owner = data.roomStatus.owner;
@@ -106,6 +105,7 @@ socket.on('leaveRoom', (data) => {
     if(isInRoom(data.roomName)){
         const leavedPlayerName = data.leavedPlayer;
         if(leavedPlayerName === user.name){
+            console.log("1235");
             room.owner = '';
             room.playerCount[1] = 0;
             room.playerCount[2] = 0;
@@ -195,7 +195,7 @@ function leaveRoom(){
         socket.emit('closeRoom', room.owner);
     }
     else{
-        socket.emit('leaveRoom', user.name);
+        socket.emit('leaveRoom', user.name, room.owner);
     }
 }
 
