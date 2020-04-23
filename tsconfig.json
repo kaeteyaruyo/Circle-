@@ -2,7 +2,7 @@
     "compilerOptions": {
         "removeComments": true,
         //"outDir": "./dst",
-        "outDir": "../../server",
+        "outDir": "server",
     },
     "include": [
         "src/*"
