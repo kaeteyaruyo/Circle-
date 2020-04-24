@@ -1,240 +1,246 @@
 const user = {
     name: /Hi, ([\S]+)!/.exec(document.querySelector('.header__username').innerHTML)[1],
-    team: 0, // 1 for red team and 2 for green team
-    // ready: false,
+    room: '',
+    team: 0, // 1 for red team and 2 for green team, 0 for not enter a room yet
+    isOwner() {
+        return this.name === this.room;
+    },
+    isInRoom(roomName) {
+        return this.room === roomName;
+    },
+    leave(){
+        if(this.isOwner()){
+            socket.emit('closeRoom', user.name);
+        }
+        else{
+            socket.emit('leaveRoom', user.name, roomStatus.owner);
+        }
+    }
 };
 
-const room = {
+const roomStatus = {
     owner: '',
     start: false,
-    playerCount: [ , 0, 0], // for team 1 and team 2
     playerInfo: {},
 }
 
-// Page initialization
+// Setup socket
 const socket = io(window.location.origin);
-document.querySelector('.main__room--create').addEventListener('click', createRoom);
-// document.querySelector('.datails__team1--join').addEventListener('click', () => { joinTeam(1) });
-// document.querySelector('.datails__team2--join').addEventListener('click', () => { joinTeam(2) });
-// document.querySelector('.datails__button--ready').addEventListener('click', getReady);
-document.querySelector('.datails__button--cancel').addEventListener('click', leaveRoom);
+
+// Add event listeners
+document.querySelector('.main__room--create').addEventListener('click', () => {
+    socket.emit('createRoom', user.name, false); // TODO: What is the false for?
+});
+document.querySelector('.datails__button--cancel').addEventListener('click', user.leave);
 document.querySelector('.datails__button--start').addEventListener('click', () => {
-    socket.emit('enterGame', room.owner);
+    socket.emit('enterGame', roomStatus.owner);
 });
-
-socket.emit('enterLobby');
-
-socket.on('enterLobby', (data) => {
-    // When someone enter lobby
-    data.rooms.forEach(room => {
-        // Add room card on looby
-        document.querySelector('.main__room--create')
-            .insertAdjacentHTML('beforebegin', generateRoomHTML(room.roomName, room.attendance));
-        document.querySelector(`#room_${ room.roomName }`)
-            .addEventListener('click', () => { joinRoom(room.roomName) });
-        // If I am the room owner, enter room
-        if(isOwner(room.roomName))
-            joinRoom(room.roomName);
-    });
-});
-
-socket.on('createRoom', (data) => {
-    // When someone create room, add room card on looby
-    document.querySelector('.main__room--create')
-        .insertAdjacentHTML('beforebegin', generateRoomHTML(data.roomName, 1));
-    document.querySelector(`#room_${ data.roomName }`)
-        .addEventListener('click', () => { joinRoom(data.roomName) });
-    // If I am the room owner, enter room
-    if(isOwner(data.roomName)){
-        joinRoom(data.roomName);
+window.addEventListener('beforeunload', () => {
+    // If I am in some room but the game haven't started,
+    // trigger leaving signal when closing page
+    if(roomStatus.owner !== '' && !roomStatus.start){
+        user.leave();
     }
 });
 
-socket.on('joinRoom', (data) => {
-// When someone join some room
-    if(isInRoom(data.roomName)){
-        // If I am in that room, update room information
-        room.owner = data.roomStatus.owner;
-        room.playerCount[1] = data.roomStatus.redTeamCount;
-        room.playerCount[2] = data.roomStatus.greenTeamCount;
-        room.playerInfo = data.roomStatus.players;
+// Emit `enterlobby` signal to get status of lobby
+socket.emit('enterLobby');
 
-        const joinedPlayerName = data.joinedPlayer;
-        if(joinedPlayerName === user.name){
-            // If I am the new joined player, record my user information too
-            user.team = data.roomStatus.players[user.name].team;
+// When server returned status of lobby
+socket.on('enterLobby', data => {
+    // Create room cards
+    data.rooms.forEach(room => {
+        createRoomCard(room.roomName, room.attendance);
+    });
+});
 
+// When someone created a new room
+socket.on('createRoom', data => {
+    // create a room card
+    createRoomCard(data.roomName, 1); // TODO: Should data contain attendence?
+
+    // If I am the one who create the room, join it
+    if(user.name === data.roomName){
+        socket.emit('joinRoom', user.name, data.roomName);
+    }
+});
+
+// When someone entered a room
+socket.on('joinRoom', data => {
+    // If I am the new joined player, record my user information
+    if(data.joinedPlayer === user.name){
+        user.room = data.roomName;
+        user.team = data.roomStatus.players[user.name].team;
+    }
+
+    // If I am in the room
+    if(user.isInRoom(data.roomName)){
+        // Update room information
+        roomStatus.owner = data.roomStatus.owner;
+        roomStatus.playerInfo = data.roomStatus.players;
+
+        // If I am the new joined player
+        if(data.joinedPlayer === user.name){
             // Fill information to UI
-            document.querySelector('.main__datails--roomname').innerHTML = `${ room.owner }'s Room`;
+            document.querySelector('.main__datails--roomname').innerHTML = `${ roomStatus.owner }'s Room`;
             Object.keys(data.roomStatus.players).forEach( playerName => {
-                document.querySelector(`.datails__team${ room.playerInfo[playerName].team }--players`)
-                    .insertAdjacentHTML('beforeend', generatePlayerHTML(room.playerInfo[playerName].team, playerName));
+                document.querySelector(`.datails__team${ roomStatus.playerInfo[playerName].team }--players`)
+                    .insertAdjacentHTML(
+                        'beforeend',
+                        generatePlayerHTML(roomStatus.playerInfo[playerName].team, playerName)
+                    );
             });
 
-            // If I am the room owner, make startButton visible
-            if(isOwner(room.owner)){
+            // If I am the room owner, make start button visible
+            if(user.isOwner()){
                 const startButton = document.querySelector('.datails__button--start');
                 startButton.style.display = 'block';
                 startButton.disabled = true;
             }
-            // document.querySelector(`.datails__team${ user.team }--join`).style.display = 'none';
+
+            // When everything get done, display room panel
+            document.querySelector('.main__details').style.display = 'block';
         }
+        // If I am not the new joined player
         else {
-            // If I am not the new joined player, just insert new player container
-            document.querySelector(`.datails__team${ room.playerInfo[joinedPlayerName].team }--players`)
-                .insertAdjacentHTML('beforeend', generatePlayerHTML(room.playerInfo[joinedPlayerName].team, joinedPlayerName));
+            // Just append new player
+            document.querySelector(`.datails__team${ roomStatus.playerInfo[data.joinedPlayer].team }--players`)
+                .insertAdjacentHTML(
+                    'beforeend',
+                    generatePlayerHTML(roomStatus.playerInfo[data.joinedPlayer].team, data.joinedPlayer)
+                );
+
             // If I am the room owner, check number of player to decied whether to start game
-            if(isOwner(room.owner) && room.playerCount[1] === 3 && room.playerCount[2] === 3){
+            // TODO: should this also be checked at backend?
+            if(user.isOwner() && Object.keys(playerInfo).length === 6){
                 document.querySelector('.datails__button--start').disabled = false;
             }
         }
     }
+
     // Update attendance on room card
-    const attendance = data.roomStatus.redTeamCount + data.roomStatus.greenTeamCount;
+    const attendance = data.roomStatus.redTeamCount + data.roomStatus.greenTeamCount; // TODO: use playerInfo instead
     const roomCard = document.querySelector(`#room_${ data.roomName }`);
-    roomCard.querySelector('.room__brief--attendance')
-        .innerHTML = `( ${ attendance } / 6 )`;
+    roomCard.querySelector('.room__brief--attendance').innerHTML = `( ${ attendance } / 6 )`;
+
     // If room has been full, don't let anyone in
-    if(attendance === 6)
+    // TODO: this should be checked at backend
+    if(attendance === 6){
         roomCard.disabled = true;
+    }
 });
 
+// When someone leaved a room
 socket.on('leaveRoom', (data) => {
-    // When someone leave some room
+    // If I am in the room
+    if(user.isInRoom(data.roomName)){
+        // If I am the leaved one
+        if(data.leavedPlayer === user.name){
+            // Reset user information
+            user.room = '';
+            user.team = 0;
 
-    if(isInRoom(data.roomName)){
-        const leavedPlayerName = data.leavedPlayer;
-        if(leavedPlayerName === user.name){
-            console.log("1235");
-            room.owner = '';
-            room.playerCount[1] = 0;
-            room.playerCount[2] = 0;
-            room.playerInfo = {};
-            // If I am the leaving player, remove all content in room panel
+            // Reset room status
+            roomStatus.owner = '';
+            roomStatus.playerInfo = {};
+
+            // Remove content in room panel
             const players = Array.from(document.querySelectorAll('.datails__team--player'));
             players.forEach(player => {
                 player.parentNode.removeChild(player);
             });
+
+            // Close room panel
             document.querySelector('.main__details').style.display = 'none';
         }
-        else{
-            room.playerCount[1] = data.roomStatus.redTeamCount;
-            room.playerCount[2] = data.roomStatus.greenTeamCount;
-            room.playerInfo = data.roomStatus.players;
-            // If I am not the leaving player, just remove the leaving one's container
-            const leavedPlayer = document.querySelector(`#user_${ leavedPlayerName }`);
+        // If I am not the leaved one
+        else {
+            // Update room status
+            roomStatus.playerInfo = data.roomStatus.players;
+
+            // Remove the leaved one's container
+            const leavedPlayer = document.querySelector(`#user_${ data.leavedPlayer }`);
             leavedPlayer.parentNode.removeChild(leavedPlayer);
-            if(isOwner(room.owner) && (room.playerCount[1] < 3 || room.playerCount[2] < 3)){
+
+            // If I am the room owner, disable start button
+            // TODO: should this also be checked at backend?
+            if(user.isOwner() && Object.keys(playerInfo).length < 6){
                 document.querySelector('.datails__button--start').disabled = true;
             }
         }
     }
+
     // Update attendance on room card
-    const attendance = data.roomStatus.redTeamCount + data.roomStatus.greenTeamCount;
+    const attendance = data.roomStatus.redTeamCount + data.roomStatus.greenTeamCount; // TODO: use playerInfo instead
     const roomCard = document.querySelector(`#room_${ data.roomName }`);
-    roomCard.querySelector('.room__brief--attendance')
-        .innerHTML = `( ${ attendance } / 6 )`;
+    roomCard.querySelector('.room__brief--attendance').innerHTML = `( ${ attendance } / 6 )`;
+
     // If room is locked, unlock it
     if(roomCard.disabled)
         roomCard.disabled = false;
 });
 
+// When someone closed a room
 socket.on('closeRoom', (data) => {
-    // When some one close a room, remove room card
-    const targetRoom = document.querySelector(`#room_${ data.roomName }`);
-    if(targetRoom)
-        targetRoom.parentNode.removeChild(targetRoom);
+    // If I am in room
+    if(user.isInRoom(data.roomName)){
+        // Reset user information
+        user.room = '';
+        user.team = 0;
 
-    if(isInRoom(data.roomName)){
-        // If I am in room, clear room information
-        room.owner = '';
-        room.playerCount[1] = 0;
-        room.playerCount[2] = 0;
-        room.playerInfo = {};
+        // Reset room status
+        roomStatus.owner = '';
+        roomStatus.playerInfo = {};
+
+        // Remove content in room panel
         const players = Array.from(document.querySelectorAll('.datails__team--player'));
         players.forEach(player => {
             player.parentNode.removeChild(player);
         });
+        document.querySelector('.datails__button--start').style.display = 'none';
+
         // If I am not the room owner, display message panel
         // { ... }
 
-        // If I am the room owner, hide the start button
-        document.querySelector('.datails__button--start').style.display = 'none';
-
+        // Hide start button and close room panel
         document.querySelector('.main__details').style.display = 'none';
+    }
+
+    // Remove room card
+    const targetRoom = document.querySelector(`#room_${ data.roomName }`);
+    if(targetRoom){
+        targetRoom.parentNode.removeChild(targetRoom);
     }
 });
 
+
+// When a room started gaming
 socket.on('enterGame', (data) => {
-    // When some room start gaming
-    if(isInRoom(data.roomName)){
+    // If I am in the room
+    if(user.isInRoom(data.roomName)){
+        // Set room status to started (to prevent trigger leave room signal)
         room.start = true;
-        // If I am in the room, redirect to route `/game`
+
+        // Redirect to route `/game`
         window.location.href = `/game/${ data.roomName }`;
     }
+    // If I am not in the room
     else{
-        // If I am not in the room, disable the room card and show it's playing
+        // Disable the room card and show it's playing
         const roomCard = document.querySelector(`#room_${ data.roomName }`);
         roomCard.querySelector('.room__brief--attendance').innerHTML = `( playing )`;
         roomCard.disabled = true;
     }
 })
 
-function createRoom(){
-    socket.emit('createRoom', user.name, false);
+function createRoomCard(name, attendance){
+    document.querySelector('.main__room--create')
+        .insertAdjacentHTML('beforebegin', generateRoomHTML(name, attendance));
+    document.querySelector(`#room_${ name }`)
+        .addEventListener('click', () => {
+            socket.emit('joinRoom', user.name, name);
+        });
 }
-
-function joinRoom(roomName){
-    room.owner = roomName;
-    socket.emit('joinRoom', user.name, roomName);
-    document.querySelector('.main__details').style.display = 'block';
-}
-
-function leaveRoom(){
-    if(isOwner(room.owner)){
-        socket.emit('closeRoom', room.owner);
-    }
-    else{
-        socket.emit('leaveRoom', user.name, room.owner);
-    }
-}
-
-// function joinTeam(teamNumber){
-//     const anotherTeamNumber = teamNumber === 1 ? 2 : 1;
-//     // Return if user has already in this team or this team has been full
-//     if(user.team === teamNumber || room.playerCount[teamNumber] >= 3)
-//         return;
-
-//     // Delete user from his/her current team
-//     const oldPosition = document.querySelector(`.datails__team${ user.team }--player${ user.position }`);
-//     oldPosition.innerHTML = '';
-//     oldPosition.style.display = 'none';
-//     --room.playerCount[anotherTeamNumber];
-
-//     // Add user to this team
-//     user.team = teamNumber;
-//     user.position = ++room.playerCount[teamNumber];
-//     const newPosition = document.querySelector(`.datails__team${ user.team }--player${ user.position }`);
-//     newPosition.innerHTML = user.name;
-//     newPosition.style.display = 'block';
-
-//     // Hide this join button and display another
-//     document.querySelector(`.datails__team${ teamNumber }--join`).style.display = 'none';
-//     document.querySelector(`.datails__team${ anotherTeamNumber }--join`).style.display = 'block';
-// }
-
-// function getReady(){
-//     // send ready signal to server and broadcast to others
-//     user.ready = true;
-//     document.querySelector(`.datails__team${ user.team }--player${ user.position }`)
-//             .classList.add(`datails__team${ user.team }--player--ready`);
-//     Array.from(document.querySelectorAll(`.datails__team--join`)).forEach(x => {
-//         x.disabled = true;
-//         x.style.display = 'none'
-//     });
-//     document.querySelector('.datails__button--cancel').disabled = true;
-//     document.querySelector('.datails__button--ready').disabled = true;
-// }
 
 function generateRoomHTML(name, attendance){
     return `
@@ -248,17 +254,3 @@ function generateRoomHTML(name, attendance){
 function generatePlayerHTML(team, name){
     return `<p class = "datails__team--player datails__team${ team }--player" id = "user_${ name }">${ name }</p>`;
 }
-
-function isOwner(roomOwner){
-    return user.name === roomOwner;
-}
-
-function isInRoom(roomName){
-    return room.owner === roomName;
-}
-
-window.addEventListener('beforeunload', () => {
-    if(room.owner !== '' && !room.start){
-        leaveRoom();
-    }
-});

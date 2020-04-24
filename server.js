@@ -67,14 +67,6 @@ app.get('/lobby', middleware.renderSetting, middleware.checkLogin, (req, res) =>
     });
 });
 
-app.get('/tutorial', middleware.renderSetting, middleware.checkLogin, (req, res) => {
-    res.render('game', {
-        title: 'Tutorial',
-        username: req.session.username,
-        mainFile: 'tutorial'
-    });
-});
-
 app.get('/game/:roomName', middleware.renderSetting, middleware.checkLogin, (req, res) => {
     res.render('game', {
         title: `${ req.params.roomName }'s Room`,

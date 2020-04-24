@@ -54,65 +54,10 @@ function createStage({width, height, username, roomname, socket}){
     let previousShape;
     stage.on('dragmove', e => {
         const shape = shapeLayer.getIntersection(stage.getPointerPosition());
-        if (previousShape && shape) {
-            if (previousShape !== shape) {
-                // // leave from old target
-                // previousShape.fire(
-                //     'dragleave',
-                //     {
-                //         type: 'dragleave',
-                //         target: previousShape,
-                //         evt: e.evt
-                //     },
-                //     true
-                // );
-
-                // // enter new targer
-                // shape.fire(
-                //     'dragenter',
-                //     {
-                //         type: 'dragenter',
-                //         target: shape,
-                //         evt: e.evt
-                //     },
-                //     true
-                // );
+        if (shape && ((previousShape && previousShape !== shape) || !previousShape)) {
                 previousShape = shape;
-            }
-            else {
-                // previousShape.fire(
-                //     'dragover',
-                //     {
-                //         type: 'dragover',
-                //         target: previousShape,
-                //         evt: e.evt
-                //     },
-                //     true
-                // );
-            }
-        }
-        else if (!previousShape && shape) {
-            previousShape = shape;
-            // shape.fire(
-            //     'dragenter',
-            //     {
-            //         type: 'dragenter',
-            //         target: shape,
-            //         evt: e.evt
-            //     },
-            //     true
-            // );
         }
         else if (previousShape && !shape) {
-            // previousShape.fire(
-            //     'dragleave',
-            //     {
-            //         type: 'dragleave',
-            //         target: previousShape,
-            //         evt: e.evt
-            //     },
-            //     true
-            // );
             previousShape = undefined;
         }
     });
@@ -194,26 +139,6 @@ function createStage({width, height, username, roomname, socket}){
         shapeLayer.draw();
         tempLayer.draw();
     });
-
-    // // Fire when drag something enter node on chessboard
-    // stage.on('dragenter', e => {
-    //     shapeLayer.draw();
-    // });
-
-    // // Fire when drag something leave node on chessboard
-    // stage.on('dragleave', e => {
-    //     shapeLayer.draw();
-    // });
-
-    // // Fire when drag something and moving over something
-    // stage.on('dragover', e => {
-    //     shapeLayer.draw();
-    // });
-
-    // // Fire when drop something on something
-    // stage.on('drop', e => {
-    //     shapeLayer.draw();
-    // });
 
     // Rescale when window size change
     stage.fitStageIntoParentContainer = () => {

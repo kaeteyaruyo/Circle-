@@ -10,7 +10,7 @@ A game that add circle to each other and get score.
     * Node.js v10.6.0
     * npm v6.2.0
 * Fork this repository to your account
-* Clone the forked repo under yout account to your computer
+* Clone the forked repo under your account to your computer
 * Go to project directory
 * Type `npm install` in command line
     * It will automatically installs all dependecies we need
