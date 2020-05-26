@@ -1,8 +1,10 @@
 "use strict";
 exports.__esModule = true;
 var Random_1 = require("./Random");
+var ApiTrait_1 = require("./ApiTrait");
 var Lobby = (function () {
     function Lobby() {
+        this.trait = new ApiTrait_1.ApiTrait();
     }
     Lobby.prototype.createRoom = function (io, socket, gameRoom, username) {
         try {
@@ -25,11 +27,7 @@ var Lobby = (function () {
             });
         }
         catch (err) {
-            console.log(err);
-            io.sockets.emit('createRoom', {
-                "roomName": "",
-                "roomStatus": {}
-            });
+            io.sockets.emit('createRoom', this.trait.returnError(403, "error when create room"));
         }
     };
     Lobby.prototype.closeRoom = function (io, socket, gameRoom, roomName) {
@@ -42,6 +40,9 @@ var Lobby = (function () {
     Lobby.prototype.joinRoom = function (io, socket, gameRoom, username, roomName) {
         try {
             var thisRoom = gameRoom[roomName];
+            if (thisRoom["redTeamCount"] + thisRoom["greenTeamCount"] == 2) {
+                throw "too many people into room";
+            }
             socket.join(roomName);
             var repeat = true;
             if (!(username in gameRoom[roomName]["players"])) {
@@ -70,8 +71,7 @@ var Lobby = (function () {
             }
         }
         catch (err) {
-            console.log(err);
-            socket.emit('updateRoom', "error when " + username + " join " + roomName);
+            socket.emit('updateRoom', this.trait.returnError(403, "error when create room"));
         }
     };
     Lobby.prototype.leaveRoom = function (io, socket, gameRoom, username, roomName) {
@@ -88,7 +88,7 @@ var Lobby = (function () {
             });
         }
         catch (err) {
-            socket.emit('leaveRoom', "error when " + username + " leave " + roomName + " username not found");
+            socket.emit('leaveRoom', this.trait.returnError(403, "error when leave room"));
         }
     };
     Lobby.prototype.enterLobby = function (io, socket, gameRoom) {

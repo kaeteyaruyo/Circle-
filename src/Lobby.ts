@@ -1,6 +1,11 @@
 import {RandomInt} from './Random'
+import {ApiTrait} from './ApiTrait'
 
 class Lobby{
+    protected trait;
+    constructor(){
+        this.trait = new ApiTrait();
+    }
     public createRoom(io: any, socket: any, gameRoom: object, username: string) :void {
         try {
             if(username in gameRoom) {
@@ -21,11 +26,7 @@ class Lobby{
                 "roomStatus" : gameRoom[username]
             });
         } catch (err) {
-            console.log(err);
-            io.sockets.emit('createRoom',{
-                "roomName" : "",
-                "roomStatus" : {}
-            });
+            io.sockets.emit('createRoom', this.trait.returnError(403, "error when create room"));
         }
     }
 
@@ -40,6 +41,9 @@ class Lobby{
     public joinRoom(io: any, socket: any, gameRoom: object, username: string, roomName: string) :void {
         try {
             let thisRoom = gameRoom[roomName];
+            if(thisRoom["redTeamCount"] + thisRoom["greenTeamCount"] == 2) {
+                throw "too many people into room";
+            }
             socket.join(roomName);
             let repeat = true;
             if(! (username in gameRoom[roomName]["players"])) {
@@ -68,8 +72,7 @@ class Lobby{
             
         } catch (err) {
             // not yet
-            console.log(err);
-            socket.emit('updateRoom',`error when ${username} join ${roomName}`);
+            socket.emit('updateRoom', this.trait.returnError(403, "error when create room"));
         }
     }
 
@@ -86,7 +89,7 @@ class Lobby{
                 "roomStatus" : thisRoom
             });
         } catch (err) {
-            socket.emit('leaveRoom',`error when ${username} leave ${roomName} username not found`);
+            socket.emit('leaveRoom', this.trait.returnError(403, "error when leave room"));
         }
     }
 
